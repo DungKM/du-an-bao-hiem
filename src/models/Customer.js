@@ -4,7 +4,10 @@ const CustomerSchema = new mongoose.Schema(
   {
     owner: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
     name: { type: String, required: true, trim: true },
+    phone: { type: String, trim: true, default: "" },
+    email: { type: String, trim: true, default: "" },
     location: { type: String, trim: true, default: "" },
+    source: { type: String, enum: ["agent", "public"], default: "agent" },
     status: {
       type: String,
       enum: ["Chưa liên hệ", "Đã liên hệ", "Đã gửi tóm tắt QL", "Đã chốt HĐ", "Từ chối"],

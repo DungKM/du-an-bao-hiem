@@ -7,7 +7,9 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isPublic =
     PUBLIC_PATHS.includes(nextUrl.pathname) ||
-    nextUrl.pathname.startsWith("/api/auth");
+    nextUrl.pathname.startsWith("/api/auth") ||
+    nextUrl.pathname.startsWith("/api/public") ||
+    nextUrl.pathname.startsWith("/tu-van/");
   const isLoggedIn = !!req.auth;
 
   if (!isLoggedIn && !isPublic) {

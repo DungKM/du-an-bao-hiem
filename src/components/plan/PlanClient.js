@@ -5,11 +5,12 @@ import { NumField, SelectField } from "./fields";
 import NeedCard from "./NeedCard";
 import BudgetPanel from "./BudgetPanel";
 import ProtectionResult from "./ProtectionResult";
-import EducationPanel, { defaultEducationChild } from "./EducationPanel";
+import EducationPanel from "./EducationPanel";
 import RetirementResult from "./RetirementResult";
 import WealthResult from "./WealthResult";
 import PlanReport from "./PlanReport";
 import { defaultIncome, normalizeIncome } from "./budgetItems";
+import { getDefaultNeeds } from "./defaultNeeds";
 import {
   WalletIcon,
   ShieldCheckIcon,
@@ -26,55 +27,8 @@ import {
   calcHealth,
 } from "@/lib/planCalculations";
 
-const DEFAULT_NEEDS = {
-  protection: {
-    selected: null,
-    monthlyIncome: 30_000_000,
-    protectPct: 70,
-    protectYears: 20,
-    liquidAssets: 300_000_000,
-    existingInsurance: 0,
-    existingDebt: 0,
-    inflationRate: 4,
-    investReturnRate: 6,
-  },
-  education: {
-    selected: null,
-    numChildren: 1,
-    children: [defaultEducationChild()],
-  },
-  retirement: {
-    selected: null,
-    currentAge: 30,
-    retireAge: 60,
-    lifeExpectancyYears: 20,
-    monthlyExpenseNow: 15_000_000,
-    currentSavings: 100_000_000,
-    monthlySaving: 0,
-    inflation: 3,
-    investReturn: 5,
-  },
-  wealth: {
-    selected: null,
-    targetAmount: 1_000_000_000,
-    currentSavings: 100_000_000,
-    monthlySaving: 0,
-    years: 5,
-    inflationRate: 3,
-    expectedReturn: 8,
-  },
-  health: {
-    selected: null,
-    criticalIllnessFund: 0,
-    accidentFund: 0,
-    hospitalFund: 0,
-    roomFeePerDay: 0,
-    hasHealthCard: "chua_co",
-    planMoreChildren: "khong_ap_dung",
-  },
-};
-
 export default function PlanClient({ agent }) {
+  const DEFAULT_NEEDS = getDefaultNeeds();
   const [customerName, setCustomerName] = useState("");
   const [customerId, setCustomerId] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
@@ -87,6 +41,27 @@ export default function PlanClient({ agent }) {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const [showReport, setShowReport] = useState(false);
+
+  const [shareLink, setShareLink] = useState("");
+  const [creatingLink, setCreatingLink] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  async function handleCreateLink() {
+    setCreatingLink(true);
+    setLinkCopied(false);
+    const res = await fetch("/api/plan-links", { method: "POST" });
+    setCreatingLink(false);
+    if (!res.ok) return;
+    const data = await res.json();
+    setShareLink(`${window.location.origin}/tu-van/${data.token}`);
+  }
+
+  async function handleCopyLink() {
+    if (!shareLink) return;
+    await navigator.clipboard.writeText(shareLink);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  }
 
   useEffect(() => {
     const name = customerName.trim();
@@ -232,6 +207,42 @@ export default function PlanClient({ agent }) {
               </div>
             )}
             {customerId && <p className="text-xs text-green-600 mt-1">Đang chỉnh sửa hồ sơ đã lưu.</p>}
+          </div>
+
+          <div className="bg-white border border-[#DED6D8] rounded-[14px] p-[18px]">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <p className="text-[14px] font-bold text-[#312629]">🔗 Gửi link cho khách hàng tự nhập</p>
+                <p className="text-[12.5px] text-[#6B7876] mt-0.5">
+                  Link chỉ dùng được 1 lần — hết hiệu lực ngay sau khi khách hàng nhập và lưu.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCreateLink}
+                disabled={creatingLink}
+                className="text-sm font-semibold px-[18px] py-2 rounded-lg border border-brand bg-brand text-white disabled:opacity-60 shrink-0"
+              >
+                {creatingLink ? "Đang tạo..." : "Tạo link"}
+              </button>
+            </div>
+            {shareLink && (
+              <div className="mt-3 flex items-center gap-2">
+                <input
+                  readOnly
+                  value={shareLink}
+                  onFocus={(e) => e.target.select()}
+                  className="flex-1 border rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-600"
+                />
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="text-sm font-semibold px-4 py-2 rounded-lg border border-[#DED6D8] text-[#312629] shrink-0"
+                >
+                  {linkCopied ? "Đã sao chép ✔" : "Sao chép"}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="bg-white border border-[#DED6D8] rounded-[14px] p-[18px]">

@@ -32,6 +32,8 @@ export async function POST(req) {
   const customer = await Customer.create({
     owner: session.user.id,
     name: body.name.trim(),
+    phone: body.phone || "",
+    email: body.email || "",
     location: body.location || "",
     expectedFee: body.expectedFee || 0,
     nextAction: body.nextAction || "",

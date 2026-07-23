@@ -27,7 +27,7 @@ export async function PUT(req, { params }) {
   const customer = await findOwned(params.id, session.user.id);
   if (!customer) return Response.json({ error: "Không tìm thấy." }, { status: 404 });
 
-  const fields = ["name", "location", "status", "expectedFee", "nextAction", "notes", "financialPlan"];
+  const fields = ["name", "phone", "email", "location", "status", "expectedFee", "nextAction", "notes", "financialPlan", "source"];
   for (const f of fields) {
     if (body[f] !== undefined) customer[f] = body[f];
   }
