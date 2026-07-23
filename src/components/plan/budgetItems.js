@@ -33,10 +33,10 @@ function normalizeList(saved, labels) {
 
 export function defaultIncome() {
   return {
-    monthlyIncome: 0,
+    monthlyIncome: 70_000_000,
     essential: ESSENTIAL_LABELS.map(() => 0),
-    nonEssential: NON_ESSENTIAL_LABELS.map(() => 0),
-    savings: SAVINGS_LABELS.map(() => 0),
+    nonEssential: [5_000_000, 2_000_000, 3_000_000, 500_000, 0],
+    savings: [2_000_000, 3_000_000, 0],
     monthlyGoal: 0,
   };
 }

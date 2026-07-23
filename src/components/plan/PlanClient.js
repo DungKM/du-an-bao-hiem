@@ -135,11 +135,6 @@ export default function PlanClient({ agent }) {
     [needs]
   );
 
-  const anySelected = useMemo(
-    () => Object.values(needs).some((n) => n.selected !== null),
-    [needs]
-  );
-
   const totalGap = useMemo(() => {
     return Object.entries(results).reduce((sum, [key, r]) => {
       if (!r) return sum;
@@ -183,13 +178,15 @@ export default function PlanClient({ agent }) {
   return (
     <div className="space-y-6">
       {showReport && (
-        <button
-          type="button"
-          onClick={() => setShowReport(false)}
-          className="no-print rounded-full bg-[#1D1466] hover:bg-[#150F4D] text-white font-bold text-sm px-5 py-2 transition"
-        >
-          ← Quay lại
-        </button>
+        <div className="no-print flex justify-between mb-4 max-w-[760px] mx-auto w-full">
+          <button
+            type="button"
+            onClick={() => setShowReport(false)}
+            className="rounded-lg bg-[#0000C1] hover:bg-[#00009c] text-white font-semibold text-[13px] px-4 py-2 transition"
+          >
+            ← Quay lại
+          </button>
+        </div>
       )}
 
       {!showReport && (
@@ -367,18 +364,16 @@ export default function PlanClient({ agent }) {
           />
         </NeedCard>
 
-          {anySelected && (
-            <button
-              type="button"
-              onClick={() => {
-                handleSave();
-                setShowReport(true);
-              }}
-              className="w-full rounded-full bg-[#1D1466] hover:bg-[#150F4D] text-white font-bold text-[15px] py-3.5 transition"
-            >
-              Xem báo cáo tổng quan
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              handleSave();
+              setShowReport(true);
+            }}
+            className="w-full rounded-full bg-[#1D1466] hover:bg-[#150F4D] text-white font-bold text-[15px] py-3.5 transition"
+          >
+            Xem báo cáo tổng quan
+          </button>
           {saveMsg && <p className="text-sm text-gray-600 text-center">{saveMsg}</p>}
         </div>
       </div>
