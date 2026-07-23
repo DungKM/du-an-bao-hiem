@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
+body {
+  background-color: #f4f4f6;
+  font-family: var(--font-be-vietnam-pro), Arial, sans-serif;
+}
+
+table td,
+table th {
+  font-family: var(--font-inter), var(--font-be-vietnam-pro), Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-area {
+    box-shadow: none !important;
+  }
+}
