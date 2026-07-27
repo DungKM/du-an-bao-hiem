@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { formatVND, calcAgeFromDOB } from "@/lib/finance";
 import { HEALTH_CARD_TIERS, MAIN_PRODUCTS, calcPersonRiders, searchOccupations } from "@/lib/premiumCalc";
-import { ChevronDownIcon, ChevronUpIcon } from "./icons";
+import { ChevronDownIcon, ChevronUpIcon, ShieldIcon } from "./icons";
 
 const NONE = "__none__";
 const TIER_OPTIONS = HEALTH_CARD_TIERS.inpatient.map((t) => t.tier);
@@ -12,7 +12,7 @@ const RIDER_GRID = "grid grid-cols-[1fr_150px_90px] sm:grid-cols-[1fr_180px_100p
 
 function RiderTableHeader() {
   return (
-    <div className={`${RIDER_GRID} border-b-2 border-[#DED6D8] pb-2 text-[11px] font-bold uppercase tracking-wide text-gray-500`}>
+    <div className={`${RIDER_GRID} items-center border-b-2 border-[#DED6D8] pt-2 pb-3 text-[11px] font-bold uppercase tracking-wide text-gray-500`}>
       <span>Tên quyền lợi</span>
       <span>STBH / Hạng thẻ</span>
       <span className="text-right">Phí đóng (đ)</span>
@@ -20,15 +20,15 @@ function RiderTableHeader() {
   );
 }
 
-function RiderTableRow({ label, hint, enabled, fee, children }) {
+function RiderTableRow({ label, hint, fee, children }) {
   return (
-    <div className={`${RIDER_GRID} items-start border-b border-gray-100 py-2.5 last:border-b-0`}>
+    <div className={`${RIDER_GRID} items-start border-b border-gray-100 py-4 last:border-b-0`}>
       <div>
         <p className="text-[13px] font-semibold text-[#312629]">{label}</p>
-        {hint && <p className="text-[11px] text-gray-400 mt-0.5">{hint}</p>}
+        {hint && <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">{hint}</p>}
       </div>
       <div className="flex flex-col gap-1.5">{children}</div>
-      <div className={`text-right text-sm font-semibold pt-0.5 ${enabled ? "text-brand" : "text-gray-300"}`}>{formatVND(fee)}</div>
+      <div className="text-right text-sm font-semibold pt-0.5 text-brand">{formatVND(fee)}</div>
     </div>
   );
 }
@@ -200,35 +200,28 @@ export default function PersonCard({
   const { rows, total } = calcPersonRiders(person, familyPremiumWithoutWaiver, designDate);
   const fee = (key) => rows.find((r) => r.key === key)?.fee || 0;
   const computedAge = person.dob ? calcAgeFromDOB(person.dob, designDate) : person.age;
+  const headerFee = total + (isMain ? Number(mainProduct.annualPremium) || 0 : 0);
 
   return (
     <div className="bg-white border border-[#DED6D8] rounded-[14px] overflow-hidden">
       <button
         type="button"
         onClick={onToggleCollapse}
-        className="w-full flex items-center justify-between gap-2 px-[18px] py-3.5 text-left"
+        className="w-full flex items-center justify-between gap-3 px-[18px] py-3.5 text-left"
       >
-        <div>
-          <p className="text-[15px] font-bold text-[#312629]">{title}</p>
-          <p className="text-xs text-gray-400 mt-0.5">
-            {person.name || "Chưa nhập tên"} · {computedAge || "?"} tuổi · {person.gender}
-            {total > 0 && <span className="text-brand font-semibold"> · {formatVND(total)}/năm</span>}
-          </p>
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-brand flex items-center justify-center shrink-0">
+            <ShieldIcon size={20} className="text-white" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[15px] font-bold text-[#312629] truncate">{title}</p>
+            <p className="text-xs text-gray-400 mt-0.5 truncate">
+              {person.name || "Chưa nhập tên"} · {computedAge || "?"} tuổi
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          {onRemove && (
-            <span
-              role="button"
-              tabIndex={0}
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemove();
-              }}
-              className="text-xs text-gray-400 hover:text-red-500"
-            >
-              ✕ Xóa
-            </span>
-          )}
+          {headerFee > 0 && <span className="text-brand font-bold text-sm">{formatVND(headerFee)}</span>}
           {collapsed ? <ChevronDownIcon size={18} className="text-gray-400" /> : <ChevronUpIcon size={18} className="text-gray-400" />}
         </div>
       </button>
@@ -277,7 +270,7 @@ export default function PersonCard({
 
           {isMain && <MainProductFields mainProduct={mainProduct} setMainProduct={setMainProduct} />}
 
-          <p className="text-xs font-bold text-[#6B7876] pt-1 uppercase tracking-wide">Quyền lợi đính kèm</p>
+          <p className="text-sm font-bold text-brand pt-2 border-t border-gray-100">Quyền lợi đính kèm</p>
           <div className="border border-gray-200 rounded-lg px-3">
             <RiderTableHeader />
 
@@ -392,10 +385,16 @@ export default function PersonCard({
             )}
           </div>
 
-          <div className="flex justify-between pt-2 border-t border-gray-100 text-sm font-bold">
-            <span>Tổng phí quyền lợi đính kèm</span>
-            <span className="text-brand">{formatVND(total)}/năm</span>
-          </div>
+          {onRemove && (
+            <button
+              type="button"
+              onClick={onRemove}
+              className="inline-flex items-center gap-2 rounded-full text-white font-semibold text-xs px-4 py-2 mt-1"
+              style={{ background: "#E88C7D" }}
+            >
+              🗑️ Xóa người được bảo hiểm này
+            </button>
+          )}
         </div>
       )}
     </div>

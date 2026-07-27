@@ -54,6 +54,47 @@ export function getMortalityRate(age, gender) {
   return gender === "Nữ" ? rate * FEMALE_MORTALITY_RATIO : rate;
 }
 
+// Chi tiết quyền lợi thẻ SK Trọn Đời — Nội trú (hạng "Cơ bản", hạn mức năm
+// 150 triệu), lấy từ bảng minh họa tham chiếu. Các hạng khác được quy đổi tỷ
+// lệ theo hạn mức năm (Nâng cao/Toàn diện/Hoàn hảo so với Cơ bản).
+export const INPATIENT_BENEFIT_ITEMS = [
+  { label: "Phí năm hợp đồng đầu tiên", isFee: true, italic: true },
+  { label: "Hạn mức mỗi năm HĐ (nhân đôi bảo vệ BV công khi đã chi hết)", useTierLimit: true },
+  { label: "Phòng, giường bệnh (tối đa 100 ngày/năm)", base: 850_000 },
+  { label: "Phòng chăm sóc đặc biệt (tối đa 30 ngày/năm)", text: "Chi phí thực tế" },
+  {
+    label: "Giường dành cho người thân (tối đa 30 ngày/năm)",
+    sub: "Chỉ áp dụng 1 người thân lưu lại cùng NĐBH < 18 tuổi hoặc NĐBH ≥ 70 tuổi",
+    base: 150_000,
+  },
+  { label: "Hỗ trợ chi phí nằm viện khi sử dụng BHYT (tối đa 30 ngày/năm)", base: 150_000 },
+  { label: "Phẫu thuật (tối đa 30 ngày trước NV; 2 lần khám/đợt điều trị)", text: "Chi phí thực tế" },
+  { label: "Điều trị trước khi nhập viện (tối đa 60 ngày trước khi nhập viện)", text: "Chi phí thực tế" },
+  { label: "Điều trị sau khi nhập viện", text: "Chi phí thực tế" },
+  { label: "Chi phí y tế nội trú khác", text: "Chi phí thực tế" },
+  { label: "Dịch vụ chăm sóc y tế tại nhà (tối đa 30 ngày/năm)", base: 150_000 },
+  { label: "Cho người được phép ghép tạng (NĐBH)", text: "Chi phí thực tế" },
+  { label: "Cho người hiến tạng (không phải NĐBH)", text: "50% chi phí phẫu thuật" },
+  { label: "Phẫu thuật thủ thuật trong ngày", text: "Chi phí thực tế" },
+  { label: "Điều trị trong ngày: viêm phế quản, sốt xuất huyết, cúm, viêm phổi (tối đa 3 lần/năm)", base: 1_500_000 },
+  { label: "Lọc máu", base: 5_000_000 },
+  { label: "Điều trị giảm nhẹ", text: "Không áp dụng" },
+  { label: "Điều trị ung thư", text: "Chi phí thực tế" },
+  { label: "Điều trị cấp cứu do tai nạn hoặc bệnh", base: 3_000_000 },
+  { label: "Vận chuyển cấp cứu do tai nạn hoặc bệnh", base: 1_500_000 },
+];
+
+const INPATIENT_BASE_LIMIT = 150_000_000;
+
+export function calcInpatientBenefitValue(item, tier) {
+  const tierRow = HEALTH_CARD_TIERS.inpatient.find((t) => t.tier === tier);
+  if (!tierRow) return null;
+  if (item.text) return item.text;
+  if (item.useTierLimit) return tierRow.limit;
+  const scale = tierRow.limit / INPATIENT_BASE_LIMIT;
+  return Math.round((item.base * scale) / 1000) * 1000;
+}
+
 export function calcHealthCardFee(type, tier, scope) {
   const table = HEALTH_CARD_TIERS[type];
   if (!table) return 0;
@@ -104,8 +145,8 @@ const DEFAULT_RIDERS = () => ({
 export function defaultPerson(role) {
   return {
     role, // "main" | "attached"
-    name: "",
-    dob: "",
+    name: role === "main" ? "Trần Văn Huy" : "",
+    dob: role === "main" ? "1990-01-01" : "",
     age: role === "main" ? 30 : 10,
     gender: "Nam",
     occupationName: "",

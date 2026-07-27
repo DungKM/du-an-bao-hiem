@@ -5,10 +5,10 @@ import User from "@/models/User";
 import ProfileCard from "@/components/profile/ProfileCard";
 
 const STATS = [
-  { value: "05", label: "Tính năng tư vấn trong bộ công cụ" },
-  { value: "50", label: "Khách hàng lưu trữ trong danh sách" },
-  { value: "14", label: "Ngày dùng thử miễn phí" },
-  { value: "24/7", label: "Truy cập hồ sơ tư vấn mọi lúc" },
+  { value: "200+", label: "Văn phòng trên toàn quốc" },
+  { value: "03", label: "Ngân hàng đối tác" },
+  { value: "1.6 Triệu", label: "Khách hàng được bảo vệ" },
+  { value: "Số 1", label: "Thế giới về số lượng thành viên MDRT" },
 ];
 
 export default async function HomePage() {
@@ -31,17 +31,17 @@ export default async function HomePage() {
 
   return (
     <div>
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-xl border-t-4 border-brand overflow-hidden">
         <ProfileCard initialProfile={profile} />
 
         <div className="bg-brand px-7 py-[18px]">
           <p className="text-[12px] font-extrabold text-white mb-2.5 tracking-[1px]">
-            VỀ TRUST TOOL
+            VỀ AIA VIỆT NAM
           </p>
           <p className="text-[12px] text-white leading-[1.8] mb-3.5">
-            Trust Tool hỗ trợ tư vấn viên hoạch định tài chính cho khách hàng: tính toán nhu cầu
-            bảo vệ, so sánh phương án đóng phí, tính phí quyền lợi, quản lý danh sách khách hàng đã
-            lưu và quà tặng thần số học — tất cả trong một nơi.
+            AIA Việt Nam là thành viên của Tập đoàn AIA — tập đoàn bảo hiểm nhân thọ độc lập lớn
+            nhất niêm yết trên thế giới, đồng hành cùng khách hàng Việt Nam trong hành trình bảo vệ
+            và phát triển tài chính lâu dài.
           </p>
           <div className="flex gap-2.5 flex-wrap">
             {STATS.map((s) => (

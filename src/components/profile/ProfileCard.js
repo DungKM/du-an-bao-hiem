@@ -40,7 +40,9 @@ export default function ProfileCard({ initialProfile }) {
   }
 
   function handleAvatarClick() {
-    if (editing) fileInputRef.current?.click();
+    if (!editing) startEdit();
+    // Đợi state editing cập nhật xong rồi mới mở hộp chọn ảnh (form.avatarDataUrl cần sẵn sàng).
+    setTimeout(() => fileInputRef.current?.click(), 0);
   }
 
   function handleAvatarChange(e) {
@@ -70,19 +72,27 @@ export default function ProfileCard({ initialProfile }) {
           className="hidden"
           onChange={handleAvatarChange}
         />
-        <div
-          onClick={handleAvatarClick}
-          className={`w-[150px] h-[150px] rounded-[20px] border-[3px] border-brand-accent bg-gradient-to-br from-brand-accent/[0.133] to-brand/[0.133] flex items-center justify-center text-5xl overflow-hidden ${
-            editing ? "cursor-pointer" : ""
-          }`}
-          title={editing ? "Bấm để đổi ảnh đại diện" : ""}
-        >
-          {avatarSrc ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatarSrc} alt="Avatar" className="w-full h-full object-cover" />
-          ) : (
-            "🧑‍💼"
-          )}
+        <div className="relative w-[150px] h-[150px]">
+          <div
+            onClick={handleAvatarClick}
+            className="w-full h-full rounded-[20px] border-[3px] border-brand-accent bg-gradient-to-br from-brand-accent/[0.133] to-brand/[0.133] flex items-center justify-center text-5xl overflow-hidden cursor-pointer"
+            title="Bấm để đổi ảnh đại diện"
+          >
+            {avatarSrc ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarSrc} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              "🧑‍💼"
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={handleAvatarClick}
+            title="Đổi ảnh đại diện"
+            className="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-full bg-brand-accent border-2 border-white text-white text-sm flex items-center justify-center shadow-md hover:bg-brand transition"
+          >
+            ✎
+          </button>
         </div>
         {avatarError && <p className="text-[11px] text-red-500 mt-1 max-w-[150px]">{avatarError}</p>}
       </div>
@@ -102,9 +112,9 @@ export default function ProfileCard({ initialProfile }) {
           )}
           <button
             onClick={startEdit}
-            className="mt-3 text-brand-accent border border-brand-accent/30 rounded-lg px-3 py-1 text-sm hover:bg-brand-light transition"
+            className="mt-3 flex items-center gap-1.5 text-white bg-brand-accent rounded-lg px-3.5 py-1.5 text-sm font-semibold shadow-sm hover:bg-brand transition"
           >
-            ✎
+            ✎ Chỉnh sửa
           </button>
         </div>
       ) : (

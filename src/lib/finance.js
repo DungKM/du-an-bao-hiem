@@ -95,11 +95,12 @@ export function formatVND(value) {
   return n.toLocaleString("vi-VN") + " đ";
 }
 
-// Rút gọn dạng "triệu đ" cho các ô tóm tắt (vd: 15.000.000 -> "15 triệu đ").
+// Rút gọn dạng "triệu đ" cho các ô tóm tắt (vd: 15.000.000 -> "15 triệu đ",
+// 16.503.000 -> "16,503 triệu đ").
 export function formatVNDShort(value) {
   const n = toNumber(value);
   if (Math.abs(n) < 1_000_000) return formatVND(n);
-  const millions = Math.round((n / 1_000_000) * 10) / 10;
+  const millions = Math.round((n / 1_000_000) * 1000) / 1000;
   const str = Number.isInteger(millions) ? String(millions) : String(millions).replace(".", ",");
   return `${str} triệu đ`;
 }

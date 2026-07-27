@@ -53,7 +53,7 @@ export default function AdminClient() {
 
   return (
     <div>
-      <ModuleHeader icon="⚙️" title="Tạo Tài Khoản" module={6} />
+      <ModuleHeader icon="⚙️" title="Tạo Tài Khoản" module={7} />
 
       <div className="grid md:grid-cols-3 gap-5">
         <div className="bg-white rounded-xl shadow-sm p-5 md:col-span-1">

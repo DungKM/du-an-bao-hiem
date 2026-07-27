@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { formatVND } from "@/lib/finance";
 import { calcAccountValue, calcPersonRiders, getEffectiveAge, HISTORICAL_CREDITING_RATES } from "@/lib/premiumCalc";
 
@@ -227,11 +227,20 @@ const RATE_SCHEDULE = [
   ["Năm 16+", "0.5%"],
 ];
 
-export default function AccountValueSection({ mainProduct, people, familyTotal, designDate }) {
+const AccountValueSection = forwardRef(function AccountValueSection({ mainProduct, people, familyTotal, designDate }, ref) {
   const [expanded, setExpanded] = useState(true);
   const [illustratedRate, setIllustratedRate] = useState(4.6);
   const [illustratedRateAfterTerm, setIllustratedRateAfterTerm] = useState("");
   const [open, setOpen] = useState({ chart: false, simple: false, detail: false });
+  const [gttkHiddenForPrint, setGttkHiddenForPrint] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    prepareForPrint(sections) {
+      setExpanded(true);
+      setOpen({ chart: !!sections.chart, simple: !!sections.simple, detail: !!sections.detail });
+      setGttkHiddenForPrint(!sections.gttk);
+    },
+  }));
 
   const toggle = (key) => setOpen((prev) => ({ ...prev, [key]: !prev[key] }));
   const mainPerson = people[0];
@@ -436,6 +445,7 @@ export default function AccountValueSection({ mainProduct, people, familyTotal, 
             ))}
           </div>
 
+          <div className={gttkHiddenForPrint ? "print:hidden" : ""}>
           <div style={{ fontSize: 13, fontWeight: 700, color: "#312629", margin: "14px 0 6px", paddingLeft: 6, borderLeft: "3px solid #D31145" }}>
             Bảng GTTK Lãi Suất Cam Kết (theo năm HĐ: 3.5% → 0.5%)
           </div>
@@ -524,6 +534,7 @@ export default function AccountValueSection({ mainProduct, people, familyTotal, 
               là cơ sở để đảm bảo chắc chắn về kết quả hoạt động trong tương lai.
             </p>
           </div>
+          </div>
 
           <p className="text-[11px] text-gray-400 pt-3">
             ⚠️ Bảng minh họa dùng công thức ước lượng (phân bổ phí, phí quản lý, lãi suất cam kết/minh họa theo năm hợp
@@ -534,4 +545,6 @@ export default function AccountValueSection({ mainProduct, people, familyTotal, 
       )}
     </div>
   );
-}
+});
+
+export default AccountValueSection;

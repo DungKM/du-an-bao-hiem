@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
+import { useSearchParams } from "next/navigation";
 import { formatVND } from "@/lib/finance";
 import { defaultPerson, calcPersonRiders, MAIN_PRODUCTS } from "@/lib/premiumCalc";
 import ModuleHeader from "@/components/ModuleHeader";
@@ -9,9 +11,23 @@ import SummaryTable from "./SummaryTable";
 import AccountValueSection from "./AccountValueSection";
 import BenefitSummary from "./BenefitSummary";
 import BrandFooter from "./BrandFooter";
+import FacebookImageTemplate from "./FacebookImageTemplate";
 import { ShieldIcon, PlusIcon, ArrowUpIcon, ArrowDownIcon } from "./icons";
 
 const MAX_ATTACHED = 6;
+
+const PRINT_SECTION_LABELS = [
+  { key: "summary", label: "Bảng tổng hợp phí & quyền lợi" },
+  { key: "benefit", label: "Tóm tắt quyền lợi bảo hiểm" },
+  { key: "chart", label: "Biểu đồ năm hòa vốn" },
+  { key: "simple", label: "Bảng phí đóng 20 năm" },
+  { key: "detail", label: "Bảng phân bổ phí các loại" },
+  { key: "gttk", label: "Bảng giá trị tài khoản (GTTK)" },
+];
+
+function defaultPrintSections() {
+  return { summary: true, benefit: true, chart: true, simple: true, detail: true, gttk: true };
+}
 
 function todayISO() {
   const d = new Date();
@@ -23,20 +39,48 @@ function defaultMainProduct() {
     productName: MAIN_PRODUCTS[0],
     paymentTerm: 20,
     sumInsured: 1_000_000_000,
-    annualPremium: 10_000_000,
+    annualPremium: 15_000_000,
   };
 }
 
-export default function PremiumClient() {
+export default function PremiumClient({ agent }) {
+  const searchParams = useSearchParams();
   const [designDate, setDesignDate] = useState(todayISO);
   const [mainProduct, setMainProduct] = useState(defaultMainProduct);
   const [people, setPeople] = useState([defaultPerson("main")]);
   const [collapsed, setCollapsed] = useState([false]);
   const [showBenefitSummary, setShowBenefitSummary] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [savedPlanId, setSavedPlanId] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState("");
+  const [printMenuOpen, setPrintMenuOpen] = useState(false);
+  const [printSections, setPrintSections] = useState(defaultPrintSections);
   const pageTopRef = useRef(null);
   const pageBottomRef = useRef(null);
   const exportRef = useRef(null);
+  const fbTemplateRef = useRef(null);
+  const accountValueRef = useRef(null);
+
+  useEffect(() => {
+    const id = searchParams.get("savedPlanId");
+    if (!id) return;
+    (async () => {
+      const res = await fetch(`/api/saved-plans/${id}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const plan = data.savedPlan;
+      if (!plan) return;
+      setSavedPlanId(plan._id);
+      if (plan.designDate) setDesignDate(plan.designDate);
+      if (plan.mainProduct) setMainProduct(plan.mainProduct);
+      if (Array.isArray(plan.people) && plan.people.length) {
+        setPeople(plan.people);
+        setCollapsed(plan.people.map(() => true));
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function updatePerson(index, next) {
     setPeople((prev) => prev.map((p, i) => (i === index ? next : p)));
@@ -69,14 +113,63 @@ export default function PremiumClient() {
 
   const attachedCount = people.length - 1;
 
+  async function handleSavePlan() {
+    const name = people[0]?.name?.trim() || "Phương án chưa đặt tên";
+    setSaving(true);
+    setSaveMsg("");
+    const method = savedPlanId ? "PUT" : "POST";
+    const url = savedPlanId ? `/api/saved-plans/${savedPlanId}` : "/api/saved-plans";
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, designDate, mainProduct, people, totalPremium: familyTotal.total }),
+    });
+    setSaving(false);
+    const data = await res.json();
+    if (!res.ok) {
+      setSaveMsg(data.error || "Không thể lưu.");
+      return;
+    }
+    setSavedPlanId(data.savedPlan._id);
+    setSaveMsg("Đã lưu vào Phương Án Đã Lưu ✔");
+    setTimeout(() => setSaveMsg(""), 3000);
+  }
+
+  function handlePrintPdf() {
+    setPrintMenuOpen(false);
+    flushSync(() => {
+      setShowBenefitSummary(printSections.benefit);
+      accountValueRef.current?.prepareForPrint(printSections);
+    });
+    window.print();
+  }
+
   async function handleExportImage() {
-    if (!exportRef.current) return;
+    if (!fbTemplateRef.current) return;
     setExporting(true);
     try {
+      if (document.fonts?.ready) await document.fonts.ready;
+      await new Promise((resolve) => {
+        const preload = new window.Image();
+        preload.onload = resolve;
+        preload.onerror = resolve;
+        preload.src = "/images/dad_kids.png";
+      });
+      const images = Array.from(fbTemplateRef.current.querySelectorAll("img"));
+      await Promise.all(
+        images.map((img) =>
+          img.complete
+            ? Promise.resolve()
+            : new Promise((resolve) => {
+                img.addEventListener("load", resolve, { once: true });
+                img.addEventListener("error", resolve, { once: true });
+              })
+        )
+      );
       const html2canvas = (await import("html2canvas")).default;
-      const canvas = await html2canvas(exportRef.current, { backgroundColor: "#ffffff", scale: 2, useCORS: true });
+      const canvas = await html2canvas(fbTemplateRef.current, { backgroundColor: "#ffffff", scale: 2, useCORS: true });
       const link = document.createElement("a");
-      link.download = "tinh-phi-quyen-loi.png";
+      link.download = `${(mainProduct.productName || "phuong-an").replace(/\s+/g, "-").toLowerCase()}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     } catch (err) {
@@ -165,7 +258,9 @@ export default function PremiumClient() {
             </button>
           )}
 
-          <SummaryTable mainProduct={mainProduct} people={people} familyTotal={familyTotal} designDate={designDate} />
+          <div className={printSections.summary ? "" : "print:hidden"}>
+            <SummaryTable mainProduct={mainProduct} people={people} familyTotal={familyTotal} designDate={designDate} />
+          </div>
 
           <button
             type="button"
@@ -179,9 +274,15 @@ export default function PremiumClient() {
             <BenefitSummary mainProduct={mainProduct} people={people} familyTotal={familyTotal} designDate={designDate} />
           )}
 
-          <AccountValueSection mainProduct={mainProduct} people={people} familyTotal={familyTotal} designDate={designDate} />
+          <AccountValueSection
+            ref={accountValueRef}
+            mainProduct={mainProduct}
+            people={people}
+            familyTotal={familyTotal}
+            designDate={designDate}
+          />
 
-          <BrandFooter />
+          <BrandFooter agent={agent} />
 
           <div className="text-center no-print">
             <button
@@ -204,30 +305,81 @@ export default function PremiumClient() {
       </div>
       <div ref={pageBottomRef} />
 
-      <div className="no-print fixed bottom-6 right-6 flex flex-col items-end gap-2 z-40">
+      <div style={{ position: "fixed", left: -99999, top: 0 }} aria-hidden="true">
+        <div ref={fbTemplateRef}>
+          <FacebookImageTemplate
+            mainProduct={mainProduct}
+            people={people}
+            familyTotal={familyTotal}
+            designDate={designDate}
+            agent={agent}
+          />
+        </div>
+      </div>
+
+      <div className="no-print fixed bottom-6 right-6 flex flex-col items-end gap-2.5 z-40">
         <button
           type="button"
-          onClick={() => window.print()}
-          className="rounded-full bg-brand text-white text-xs font-semibold px-4 py-2.5 shadow-lg hover:bg-brand-dark"
+          onClick={() => pageTopRef.current?.scrollIntoView({ behavior: "smooth" })}
+          title="Về đầu trang"
+          className="w-10 h-10 rounded-full text-white shadow-lg flex items-center justify-center"
+          style={{ background: "rgb(224,64,112)" }}
         >
-          🖨️ Lưu PDF
+          <ArrowUpIcon size={16} />
         </button>
-        <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => pageBottomRef.current?.scrollIntoView({ behavior: "smooth" })}
+          title="Xuống cuối trang"
+          className="w-10 h-10 rounded-full bg-brand-dark text-white shadow-lg flex items-center justify-center"
+        >
+          <ArrowDownIcon size={16} />
+        </button>
+
+        <button
+          type="button"
+          onClick={handleSavePlan}
+          disabled={saving}
+          className="rounded-full text-white text-xs font-semibold px-4 py-2.5 shadow-lg disabled:opacity-60"
+          style={{ background: "#0000C1" }}
+        >
+          {saving ? "Đang lưu..." : "💾 Lưu phương án"}
+        </button>
+        {saveMsg && <p className="text-[11px] text-brand bg-white rounded-lg px-2 py-1 shadow">{saveMsg}</p>}
+
+        <div className="relative">
+          {printMenuOpen && (
+            <div className="absolute bottom-full right-0 mb-2 w-64 bg-white rounded-xl shadow-xl border border-[#DED6D8] p-3">
+              <p className="text-sm font-bold text-[#312629] mb-2 flex items-center gap-1.5">📄 Chọn nội dung muốn in</p>
+              <div className="space-y-1.5 mb-3">
+                {PRINT_SECTION_LABELS.map((s, i) => (
+                  <label key={s.key} className="flex items-center gap-2 text-xs text-[#312629]">
+                    <input
+                      type="checkbox"
+                      checked={printSections[s.key]}
+                      onChange={(e) => setPrintSections((prev) => ({ ...prev, [s.key]: e.target.checked }))}
+                    />
+                    {i + 1}. {s.label}
+                  </label>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={handlePrintPdf}
+                className="w-full rounded-full text-white font-semibold text-sm py-2"
+                style={{ background: "rgb(224,64,112)" }}
+              >
+                🖨️ Lưu PDF ngay
+              </button>
+            </div>
+          )}
           <button
             type="button"
-            onClick={() => pageTopRef.current?.scrollIntoView({ behavior: "smooth" })}
-            title="Về đầu trang"
-            className="w-9 h-9 rounded-full bg-white border border-[#DED6D8] text-brand shadow flex items-center justify-center hover:bg-brand-light"
+            onClick={() => setPrintMenuOpen((v) => !v)}
+            className="rounded-full text-white text-xs font-semibold px-4 py-2.5 shadow-lg"
+            style={{ background: "rgb(224,64,112)" }}
           >
-            <ArrowUpIcon size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={() => pageBottomRef.current?.scrollIntoView({ behavior: "smooth" })}
-            title="Xuống cuối trang"
-            className="w-9 h-9 rounded-full bg-brand text-white shadow flex items-center justify-center hover:bg-brand-dark"
-          >
-            <ArrowDownIcon size={16} />
+            🖨️ Lưu PDF {printMenuOpen ? "▲" : "▼"}
           </button>
         </div>
       </div>

@@ -9,21 +9,29 @@ const BASE_ITEMS = [
   { href: "/tinh-phi-quyen-loi", icon: "🛡️", label: "Tính Phí Quyền Lợi", module: 3 },
   { href: "/so-sanh-dong-phi", icon: "🔀", label: "So Sánh Đóng Phí", module: 4 },
   { href: "/khach-hang", icon: "👥", label: "Khách Hàng Đã Lưu", module: 5 },
+  { href: "/phuong-an-da-luu", icon: "💾", label: "Phương Án Đã Lưu", module: 6 },
 ];
 
 export default function Sidebar({ isAdmin }) {
   const pathname = usePathname();
 
   const items = isAdmin
-    ? [...BASE_ITEMS, { href: "/admin", icon: "⚙️", label: "Tạo Tài Khoản", module: 6 }]
+    ? [...BASE_ITEMS, { href: "/admin", icon: "⚙️", label: "Tạo Tài Khoản", module: 7 }]
     : BASE_ITEMS;
 
   return (
     <aside className="w-[250px] shrink-0 bg-sidebar-bg border-r border-sidebar-border p-4 no-print">
       <Link
-        href="/hoach-dinh-tai-chinh"
-        className="flex items-center gap-2 w-full rounded-[9px] mb-3 px-[11px] py-[7px] border border-[#EAE4D6] bg-white text-sidebar-text text-[12.5px] font-semibold shadow-sm hover:bg-gray-50 transition"
+        href="/"
+        className={`relative flex items-center gap-2 w-full rounded-[9px] mb-3 px-[11px] py-[7px] text-[12.5px] transition ${
+          pathname === "/"
+            ? "bg-brand-light border border-brand-accent/[0.27] text-brand-accent font-bold shadow-[0_2px_8px_rgba(211,17,69,0.15)]"
+            : "bg-white border border-[#EAE4D6] text-sidebar-text font-semibold shadow-sm hover:bg-gray-50"
+        }`}
       >
+        {pathname === "/" && (
+          <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-[3px] bg-brand-accent" />
+        )}
         <span className="text-sm shrink-0">▶</span>
         <span className="flex-1">Bắt đầu tư vấn</span>
       </Link>

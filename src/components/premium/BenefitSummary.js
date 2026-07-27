@@ -2,10 +2,16 @@
 
 import { useMemo } from "react";
 import { formatVND, formatVNDShort, formatDateVN } from "@/lib/finance";
-import { calcPersonRiders, calcAccountValue, calcThyroidEarlyStageBenefit, getEffectiveAge } from "@/lib/premiumCalc";
+import {
+  calcPersonRiders,
+  calcAccountValue,
+  calcThyroidEarlyStageBenefit,
+  calcInpatientBenefitValue,
+  getEffectiveAge,
+  INPATIENT_BENEFIT_ITEMS,
+} from "@/lib/premiumCalc";
 
 const RIDER_ORDER = [
-  { key: "healthCardInpatient", label: "Thẻ SK Trọn Đời — Nội trú" },
   { key: "healthCardOutpatient", label: "Thẻ SK Trọn Đời — Ngoại trú" },
   { key: "healthCardDental", label: "Thẻ SK Trọn Đời — Nha khoa" },
   { key: "hospitalCash", label: "Hỗ trợ chi phí nằm viện" },
@@ -16,7 +22,6 @@ const RIDER_ORDER = [
 ];
 
 const RIDER_DESCRIPTIONS = {
-  healthCardInpatient: (r) => `Nội trú, hạn mức theo hạng "${r.tier}"${r.scope === "global" ? ", toàn cầu" : ", Việt Nam"}.`,
   healthCardOutpatient: (r) => `Ngoại trú, hạn mức theo hạng "${r.tier}".`,
   healthCardDental: (r) => `Nha khoa, hạn mức theo hạng "${r.tier}".`,
   hospitalCash: (r) => `Trợ cấp ${formatVND(r.amountPerDay)}/ngày nằm viện.`,
@@ -26,25 +31,39 @@ const RIDER_DESCRIPTIONS = {
   waiver: () => "Miễn phí các năm còn lại cho cả gia đình nếu người này tử vong/mất khả năng lao động.",
 };
 
-function BannerRow({ colSpan, children }) {
+function BannerRow({ colSpan, compact, children }) {
   return (
     <tr>
-      <td colSpan={colSpan} style={{ background: "#D31145" }} className="text-white text-xs font-bold py-1.5 px-2">
+      <td
+        colSpan={colSpan}
+        style={{ background: "#D31145" }}
+        className={`text-white font-bold ${compact ? "text-[10px] py-1 px-2" : "text-xs py-1.5 px-2"}`}
+      >
         {children}
       </td>
     </tr>
   );
 }
 
-function BenefitRow({ label, sub, values }) {
+function SubHeaderRow({ colSpan, compact, children }) {
+  return (
+    <tr>
+      <td colSpan={colSpan} className={`bg-[#FDF3F6] font-semibold text-[#312629] ${compact ? "text-[10px] py-1 px-2" : "text-xs py-1.5 px-2"}`}>
+        {children}
+      </td>
+    </tr>
+  );
+}
+
+function BenefitRow({ label, sub, values, compact, indent, italic }) {
   return (
     <tr className="border-b border-dashed border-gray-200 align-top">
-      <td className="py-2 pr-3">
-        <p className="text-sm font-semibold text-[#312629]">{label}</p>
-        {sub && <p className="text-xs text-gray-500 italic mt-0.5">{sub}</p>}
+      <td className={`py-2 pr-3 ${indent ? "pl-5" : ""}`}>
+        <p className={`text-[#312629] ${italic ? "italic font-normal" : "font-semibold"} ${compact ? "text-xs" : "text-sm"}`}>{label}</p>
+        {sub && <p className={`text-gray-500 italic mt-0.5 ${compact ? "text-[9px]" : "text-xs"}`}>{sub}</p>}
       </td>
       {values.map((v, i) => (
-        <td key={i} className="py-2 px-2 text-right text-sm font-semibold">{v}</td>
+        <td key={i} className={`py-2 px-2 text-right font-semibold ${compact ? "text-xs" : "text-sm"}`}>{v}</td>
       ))}
     </tr>
   );
@@ -55,6 +74,7 @@ export default function BenefitSummary({ mainProduct, people, familyTotal, desig
   const mainAge = getEffectiveAge(mainPerson, designDate);
   const thyroidEarly = calcThyroidEarlyStageBenefit(mainProduct.sumInsured);
   const columnCount = 1 + people.length;
+  const compact = people.length >= 3;
 
   const accountValue = useMemo(
     () =>
@@ -76,29 +96,35 @@ export default function BenefitSummary({ mainProduct, people, familyTotal, desig
   // Chỉ cột NĐBH chính (index 0) có giá trị cho các dòng thuộc sản phẩm chính; các cột khác hiện "-".
   const mainOnly = (value) => people.map((_, i) => (i === 0 ? value : "-"));
 
+  const inpatientTiers = people.map((p) => (p.riders.healthCardInpatient.enabled ? p.riders.healthCardInpatient.tier : null));
+  const anyInpatient = inpatientTiers.some(Boolean);
+
   return (
-    <div className="bg-white border border-[#DED6D8] rounded-[14px] overflow-hidden">
-      <div className="bg-brand text-white px-[18px] py-3 flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <p className="text-[15px] font-black tracking-wide">TÓM TẮT QUYỀN LỢI BẢO HIỂM</p>
-          <p className="text-xs opacity-90 mt-0.5">{mainProduct.productName}</p>
+    <div className="bg-white border border-[#E0D4D7] rounded-[10px] overflow-hidden">
+      <div className="bg-brand text-white px-[18px] py-3.5">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <p className="text-[15px] font-black tracking-wide">TÓM TẮT QUYỀN LỢI BẢO HIỂM</p>
+            <p className="text-xs opacity-90 mt-0.5">{mainProduct.productName}</p>
+          </div>
+          <div className="text-right text-[11px] opacity-90 space-y-0.5">
+            <p>Ngày thiết kế: {formatDateVN(designDate)}</p>
+            <p>Thời hạn đóng phí: <b className="font-bold">{mainProduct.paymentTerm} năm</b></p>
+            <p>Phí đóng năm đầu: <b className="font-bold">{formatVNDShort(familyTotal.total)}</b></p>
+          </div>
         </div>
-        <div className="text-right text-[11px] opacity-90 space-y-0.5">
-          <p>Ngày thiết kế: {formatDateVN(designDate)}</p>
-          <p>Thời hạn đóng phí: <b className="font-bold">{mainProduct.paymentTerm} năm</b></p>
-          <p>Phí đóng năm đầu: <b className="font-bold">{formatVNDShort(mainProduct.annualPremium)}</b></p>
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px]">
+          {people.map((p, i) => (
+            <span key={i}>
+              <span className="opacity-70">{i === 0 ? "NĐBH Chính" : `NĐBH Đính Kèm ${i}`}: </span>
+              <b>{p.name || "—"}</b> — {getEffectiveAge(p, designDate) || "?"} tuổi — {p.gender}
+            </span>
+          ))}
         </div>
       </div>
-      <p className="px-[18px] pt-3 text-sm text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
-        {people.map((p, i) => (
-          <span key={i}>
-            {i === 0 ? "NĐBH Chính" : `NĐBH Đính Kèm ${i}`}: <b>{p.name || "—"}</b> — {getEffectiveAge(p, designDate) || "?"} tuổi — {p.gender}
-          </span>
-        ))}
-      </p>
 
-      <div className="px-[18px] pb-[18px] pt-2 overflow-x-auto">
-        <table className="w-full text-sm zebra-table table-fixed min-w-[560px]">
+      <div className="px-[18px] pb-[18px] pt-3 overflow-x-auto">
+        <table className="w-full zebra-table table-fixed min-w-[560px]">
           <colgroup>
             <col style={{ width: `${Math.max(30, 55 - people.length * 6)}%` }} />
             {people.map((_, i) => (
@@ -106,75 +132,115 @@ export default function BenefitSummary({ mainProduct, people, familyTotal, desig
             ))}
           </colgroup>
           <thead>
-            <tr className="border-b-2 border-[#DED6D8] text-left bg-[#FDF3F6]">
-              <th className="py-2 px-2">Tên Quyền Lợi</th>
+            <tr className={`border-b-2 border-[#DED6D8] text-left bg-[#FDF3F6] ${compact ? "text-[10px]" : "text-sm"}`}>
+              <th className="py-2 px-2 text-[#1A1A1A]">Tên Quyền Lợi</th>
               {people.map((p, i) => (
-                <th key={i} className="text-center px-2 text-brand font-bold">
+                <th key={i} className="text-center px-2 text-[#1A1A1A] font-bold">
                   {p.name || "—"}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            <BannerRow colSpan={columnCount}>📋 SẢN PHẨM CHÍNH</BannerRow>
-            <BenefitRow label="Số tiền bảo hiểm sản phẩm chính (STBH)" values={mainOnly(formatVND(mainProduct.sumInsured))} />
+            <BannerRow colSpan={columnCount} compact={compact}>📋 SẢN PHẨM CHÍNH</BannerRow>
+            <BenefitRow compact={compact} label="Số tiền bảo hiểm sản phẩm chính (STBH)" values={mainOnly(formatVND(mainProduct.sumInsured))} />
 
-            <BannerRow colSpan={columnCount}>1.1. Quyền lợi Thương Tật Toàn Bộ Vĩnh Viễn (TTTBVV)</BannerRow>
+            <BannerRow colSpan={columnCount} compact={compact}>1.1. Quyền lợi bảo hiểm Tử vong</BannerRow>
             <BenefitRow
-              label="TTTBVV không do ung thư tuyến giáp — trước 75 tuổi"
-              sub="Số lớn hơn giữa Số tiền bảo hiểm và GTTK hợp đồng, cộng GTTK đóng thêm"
-              values={mainOnly("Chi trả số lớn hơn giữa Số tiền bảo hiểm và GTTK hợp đồng, cộng GTTK đóng thêm")}
-            />
-            <BenefitRow
-              label="TTTBVV do ung thư tuyến giáp giai đoạn sớm — trước 75 tuổi"
-              sub={`Chi trả 1 lần 10% STBH, tối đa 200 triệu VNĐ/NĐBH. = MIN(${Math.round(mainProduct.sumInsured * 0.1).toLocaleString("vi-VN")}, 200.000.000)`}
-              values={mainOnly(formatVND(thyroidEarly))}
-            />
-            <BenefitRow
-              label="TTTBVV do ung thư tuyến giáp giai đoạn nghiêm trọng — trước 75 tuổi"
-              sub="Số lớn hơn giữa Số tiền bảo hiểm và GTTK hợp đồng, cộng GTTK đóng thêm, trừ khoản UT tuyến giáp giai đoạn sớm đã nhận"
-              values={mainOnly("Chi trả số lớn hơn giữa Số tiền bảo hiểm và GTTK hợp đồng, cộng GTTK đóng thêm − QL UT TG giai đoạn sớm đã chi trả (nếu có)")}
-            />
-
-            <BannerRow colSpan={columnCount}>1.2. Tử vong</BannerRow>
-            <BenefitRow
-              label="Chi trả số lớn hơn giữa Số tiền bảo hiểm và GTTK hợp đồng, cộng GTTK đóng thêm"
-              sub="Số lớn hơn giữa Số tiền bảo hiểm và Giá trị tài khoản, cộng với GTTK đóng thêm"
+              compact={compact}
+              label="Chi trả Số lớn hơn giữa STBH và GTTK cơ bản + GTTK đóng thêm"
+              sub="Số lớn hơn giữa Số tiền bảo hiểm và GTTK cơ bản, cộng với GTTK đóng thêm"
               values={mainOnly("—")}
             />
 
-            <BannerRow colSpan={columnCount}>💰 GIÁ TRỊ HOÀN LẠI &amp; TỔNG PHÍ</BannerRow>
+            <BannerRow colSpan={columnCount} compact={compact}>1.2. Quyền lợi bảo hiểm Thương tật toàn bộ vĩnh viễn (TTTBVV)</BannerRow>
             <BenefitRow
+              compact={compact}
+              label="1.2.1. Quyền lợi bảo hiểm TTTBVV không do ung thư tuyến giáp"
+              sub="TTTBVV do tổn thương cơ thể (không bao gồm tỷ lệ tổn thương cơ thể do ung thư tuyến giáp) trước 75 tuổi hoặc từ ngày đạt 75 tuổi cho đến trước Ngày kỷ niệm hợp đồng kế tiếp, chi trả Số lớn hơn giữa STBH và GTTK cơ bản + GTTK đóng thêm."
+              values={mainOnly("Chi trả Số lớn hơn giữa STBH và GTTK cơ bản + GTTK đóng thêm")}
+            />
+            <SubHeaderRow colSpan={columnCount} compact={compact}>1.2.2. Quyền lợi bảo hiểm TTTBVV do ung thư tuyến giáp</SubHeaderRow>
+            <BenefitRow
+              compact={compact}
+              indent
+              label="a) Giai đoạn sớm"
+              sub={`TTTBVV do ung thư tuyến giáp giai đoạn sớm, chi trả 1 lần 10% STBH, không vượt quá 200 triệu đồng. = MIN(${Math.round(mainProduct.sumInsured * 0.1).toLocaleString("vi-VN")}, 200.000.000)`}
+              values={mainOnly(formatVND(thyroidEarly))}
+            />
+            <BenefitRow
+              compact={compact}
+              indent
+              label="b) Giai đoạn nghiêm trọng"
+              sub="TTTBVV do ung thư tuyến giáp giai đoạn nghiêm trọng, chi trả Số lớn hơn giữa STBH và GTTK cơ bản + GTTK đóng thêm."
+              values={mainOnly("Chi trả Số lớn hơn giữa STBH và GTTK cơ bản + GTTK đóng thêm")}
+            />
+
+            {anyInpatient && (
+              <>
+                <BannerRow colSpan={columnCount} compact={compact}>🏥 BẢO HIỂM CHĂM SÓC SỨC KHỎE TRỌN ĐỜI — NỘI TRÚ</BannerRow>
+                <BenefitRow compact={compact} label="Hạng thẻ" values={inpatientTiers.map((t) => t || "-")} />
+                {INPATIENT_BENEFIT_ITEMS.map((item, idx) => (
+                  <BenefitRow
+                    key={idx}
+                    compact={compact}
+                    indent
+                    italic={item.italic}
+                    label={item.label}
+                    sub={item.sub}
+                    values={people.map((p, i) => {
+                      if (!inpatientTiers[i]) return "-";
+                      if (item.isFee) {
+                        const row = perPersonRows[i].rows.find((r) => r.key === "healthCardInpatient");
+                        return row ? formatVND(row.fee) : "-";
+                      }
+                      const v = calcInpatientBenefitValue(item, inpatientTiers[i]);
+                      return typeof v === "number" ? formatVND(v) : v;
+                    })}
+                  />
+                ))}
+              </>
+            )}
+
+            <BannerRow colSpan={columnCount} compact={compact}>💰 GIÁ TRỊ HOÀN LẠI &amp; TỔNG PHÍ</BannerRow>
+            <BenefitRow
+              compact={compact}
               label={`Tổng số tiền SP chính dự kiến (${mainProduct.paymentTerm} năm)`}
               values={mainOnly(formatVND(totalMainPremium))}
             />
             <BenefitRow
+              compact={compact}
               label={`Tổng số tiền SP đính kèm dự kiến (${mainProduct.paymentTerm} năm)`}
               values={mainOnly(totalAttachedPremium > 0 ? formatVND(totalAttachedPremium) : "—")}
             />
             <BenefitRow
+              compact={compact}
               label="Tổng cộng SP chính &amp; đính kèm &amp; Topup dự kiến"
               values={mainOnly(formatVND(totalMainPremium + totalAttachedPremium))}
             />
             <BenefitRow
+              compact={compact}
               label="Giá trị hoàn lại đảm bảo (lãi suất cam kết) — năm 15"
               values={mainOnly(accountValue.checkpoints.guaranteedYear15 != null ? formatVND(accountValue.checkpoints.guaranteedYear15) : "—")}
             />
             <BenefitRow
+              compact={compact}
               label="Giá trị hoàn lại đảm bảo (lãi suất cam kết) — năm 20"
               values={mainOnly(accountValue.checkpoints.guaranteedYear20 != null ? formatVND(accountValue.checkpoints.guaranteedYear20) : "—")}
             />
             <BenefitRow
+              compact={compact}
               label="Giá trị hoàn lại ở lãi suất minh họa 4.6%/năm — năm 15"
               values={mainOnly(accountValue.checkpoints.illustratedYear15 != null ? formatVND(accountValue.checkpoints.illustratedYear15) : "—")}
             />
             <BenefitRow
+              compact={compact}
               label="Giá trị hoàn lại ở lãi suất minh họa 4.6%/năm — năm 20"
               values={mainOnly(accountValue.checkpoints.illustratedYear20 != null ? formatVND(accountValue.checkpoints.illustratedYear20) : "—")}
             />
 
             {RIDER_ORDER.some((meta) => perPersonRows.some((pr) => pr.rows.some((r) => r.key === meta.key))) && (
-              <BannerRow colSpan={columnCount}>🏥 QUYỀN LỢI ĐÍNH KÈM</BannerRow>
+              <BannerRow colSpan={columnCount} compact={compact}>🏥 QUYỀN LỢI ĐÍNH KÈM KHÁC</BannerRow>
             )}
             {RIDER_ORDER.map((meta) => {
               const anyone = perPersonRows.some((pr) => pr.rows.some((r) => r.key === meta.key));
@@ -182,6 +248,7 @@ export default function BenefitSummary({ mainProduct, people, familyTotal, desig
               return (
                 <BenefitRow
                   key={meta.key}
+                  compact={compact}
                   label={meta.label}
                   sub={
                     people
@@ -204,7 +271,8 @@ export default function BenefitSummary({ mainProduct, people, familyTotal, desig
         </table>
 
         <p className="text-xs text-gray-400 mt-3">
-          Bản tóm tắt mang tính chất minh họa, không thay thế điều khoản hợp đồng chính thức.
+          Bản tóm tắt mang tính chất minh họa, không thay thế điều khoản hợp đồng chính thức. Hạn mức các quyền lợi
+          thẻ sức khỏe ngoài hạng "Cơ bản" được quy đổi tỷ lệ theo hạn mức năm, mang tính chất minh họa.
         </p>
       </div>
     </div>
