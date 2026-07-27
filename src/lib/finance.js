@@ -94,3 +94,32 @@ export function formatVND(value) {
   const n = Math.round(toNumber(value));
   return n.toLocaleString("vi-VN") + " đ";
 }
+
+// Rút gọn dạng "triệu đ" cho các ô tóm tắt (vd: 15.000.000 -> "15 triệu đ").
+export function formatVNDShort(value) {
+  const n = toNumber(value);
+  if (Math.abs(n) < 1_000_000) return formatVND(n);
+  const millions = Math.round((n / 1_000_000) * 10) / 10;
+  const str = Number.isInteger(millions) ? String(millions) : String(millions).replace(".", ",");
+  return `${str} triệu đ`;
+}
+
+// Ngày dạng "yyyy-mm-dd" (giá trị input type="date") -> tuổi tại một ngày tham chiếu.
+export function calcAgeFromDOB(dobISO, referenceISO) {
+  if (!dobISO) return null;
+  const dob = new Date(dobISO);
+  const ref = referenceISO ? new Date(referenceISO) : new Date();
+  if (Number.isNaN(dob.getTime()) || Number.isNaN(ref.getTime())) return null;
+  let age = ref.getFullYear() - dob.getFullYear();
+  const hasHadBirthdayThisYear =
+    ref.getMonth() > dob.getMonth() || (ref.getMonth() === dob.getMonth() && ref.getDate() >= dob.getDate());
+  if (!hasHadBirthdayThisYear) age -= 1;
+  return Math.max(age, 0);
+}
+
+export function formatDateVN(dateISO) {
+  if (!dateISO) return "";
+  const d = new Date(dateISO);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("vi-VN");
+}

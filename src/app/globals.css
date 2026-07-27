@@ -18,6 +18,10 @@ table th {
   font-variant-numeric: tabular-nums;
 }
 
+.zebra-table tbody tr:nth-child(even) > td {
+  background-color: #FDF3F6;
+}
+
 @media print {
   .no-print {
     display: none !important;
