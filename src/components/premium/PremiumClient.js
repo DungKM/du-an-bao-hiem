@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { formatVND } from "@/lib/finance";
-import { defaultPerson, calcPersonRiders, MAIN_PRODUCTS } from "@/lib/premiumCalc";
+import { defaultPerson, calcPersonRiders, getEffectiveAge, MAIN_PRODUCTS } from "@/lib/premiumCalc";
 import ModuleHeader from "@/components/ModuleHeader";
 import PersonCard from "./PersonCard";
 import SummaryTable from "./SummaryTable";
@@ -44,6 +44,7 @@ function defaultMainProduct() {
 }
 
 export default function PremiumClient({ agent }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [designDate, setDesignDate] = useState(todayISO);
   const [mainProduct, setMainProduct] = useState(defaultMainProduct);
@@ -142,6 +143,19 @@ export default function PremiumClient({ agent }) {
       accountValueRef.current?.prepareForPrint(printSections);
     });
     window.print();
+  }
+
+  function handleGoToCompare() {
+    const mainPerson = people[0];
+    const params = new URLSearchParams({
+      product: mainProduct.productName || "",
+      name: mainPerson.name || "",
+      age: String(getEffectiveAge(mainPerson, designDate) || ""),
+      gender: mainPerson.gender || "",
+      premium: String(mainProduct.annualPremium || ""),
+      sumInsured: String(mainProduct.sumInsured || ""),
+    });
+    router.push(`/so-sanh-dong-phi?${params.toString()}`);
   }
 
   async function handleExportImage() {
@@ -346,6 +360,15 @@ export default function PremiumClient({ agent }) {
           {saving ? "Đang lưu..." : "💾 Lưu phương án"}
         </button>
         {saveMsg && <p className="text-[11px] text-brand bg-white rounded-lg px-2 py-1 shadow">{saveMsg}</p>}
+
+        <button
+          type="button"
+          onClick={handleGoToCompare}
+          className="rounded-full text-white text-xs font-semibold px-4 py-2.5 shadow-lg"
+          style={{ background: "rgb(224,64,112)" }}
+        >
+          🔀 So sánh đóng phí
+        </button>
 
         <div className="relative">
           {printMenuOpen && (

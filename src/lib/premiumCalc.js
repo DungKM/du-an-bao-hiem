@@ -361,6 +361,33 @@ export function calcAccountValue({ sumInsured, annualPremium, age, gender, payme
   };
 }
 
+// Giá trị tài khoản dự kiến tại đúng 1 năm hợp đồng, dùng riêng cho công cụ so
+// sánh thời hạn đóng phí (VD: đóng 10 năm nhưng xem giá trị ở năm hợp đồng thứ
+// 20). Khác với calcAccountValue (dừng chiếu & kẹp về 0 khi mất hiệu lực để vẽ
+// bảng GTTK suốt đời hợp đồng), hàm này chiếu tiếp không kẹp âm, để lộ ra giá
+// trị âm/không đủ khi ngừng đóng phí sớm — đúng như một cảnh báo rủi ro, không
+// phải giá trị hoàn lại thật (không thể âm trên hợp đồng thật).
+export function calcAccountValueAtYear({ sumInsured, annualPremium, age, gender, paymentTerm, evalYear }, rateForYear) {
+  const premium = toNumber(annualPremium);
+  const term = Math.max(toNumber(paymentTerm), 1);
+  const startAge = toNumber(age);
+  const targetYear = Math.max(toNumber(evalYear), 1);
+
+  let value = 0;
+  for (let year = 1; year <= targetYear; year++) {
+    const currentAge = startAge + year - 1;
+    const yearPremium = year <= term ? premium : 0;
+    const allocated = yearPremium * allocationRate(year);
+    const mortalityRate = getMortalityRate(currentAge, gender);
+    const netAmountAtRisk = Math.max(toNumber(sumInsured) - value, 0);
+    const coi = (netAmountAtRisk / 1000) * mortalityRate;
+    const adminFee = adminFeeAnnual(year);
+    const bonus = loyaltyBonus(year, premium, term);
+    value = (value + allocated + bonus - coi - adminFee) * (1 + rateForYear(year, term));
+  }
+  return value;
+}
+
 // 7 sản phẩm chính có thể chọn trong bản minh họa.
 export const MAIN_PRODUCTS = [
   "Vững Tương Lai",
