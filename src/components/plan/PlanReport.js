@@ -266,8 +266,7 @@ export default function PlanReport({ customerName, income, needs, results, agent
           )}
         </div>
         <div className="text-left">
-          <div className="text-[13px] font-black text-[#1A0A12] mb-0.5">{agent?.name}</div>
-          <div className="text-[11px] text-brand font-bold mb-1">Tài khoản dùng thử</div>
+          <div className="text-[13px] font-black text-[#1A0A12] mb-1">{agent?.name}</div>
           {(agent?.phone || agent?.email) && (
             <div className="flex flex-wrap gap-x-3.5 gap-y-0.5 text-[11px] text-[#6E5A5F]">
               {agent?.phone && <span>📞 {agent.phone}</span>}

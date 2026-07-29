@@ -279,7 +279,6 @@ export default function FacebookImageTemplate({ mainProduct, people, familyTotal
               <span style={{ lineHeight: 1 }}>{agent?.name || "Tư vấn viên"}</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="#3B82F6" style={{ display: "block", flexShrink: 0, transform: "translateY(2px)" }}><path d="M12 2 14.4 4.6 17.8 4.2 18.4 7.6 21.4 9.2 20 12.4 21.4 15.6 18.4 17.2 17.8 20.6 14.4 20.2 12 22.8 9.6 20.2 6.2 20.6 5.6 17.2 2.6 15.6 4 12.4 2.6 9.2 5.6 7.6 6.2 4.2 9.6 4.6Z"/><path d="M9 12.5l2 2 4-4.5" stroke="#fff" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </p>
-            <p style={{ fontSize: 14, fontWeight: 700, color: "#FFD54A", marginTop: 2 }}>Tài khoản dùng thử</p>
             {(agent?.phone || agent?.email) && (
               <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4px 18px", fontSize: 14, fontWeight: 600, marginTop: 6, lineHeight: 1 }}>
                 {agent?.phone && (

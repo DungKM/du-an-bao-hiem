@@ -13,6 +13,7 @@ export default async function ThanSoHocPage() {
     phone: dbUser?.phone || "",
     email: dbUser?.email || "",
     bio: dbUser?.bio || "",
+    avatarDataUrl: dbUser?.avatarDataUrl || "",
   };
 
   return <NumerologyClient agent={agent} />;

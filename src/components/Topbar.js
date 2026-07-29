@@ -34,17 +34,6 @@ export default function Topbar({ user, daysLeft }) {
 
   return (
     <>
-      {user?.role !== "admin" && daysLeft !== null && (
-        <div className="bg-brand text-white flex items-center justify-center gap-3 px-4 py-2.5 text-[13px] font-bold shadow-md no-print">
-          <span>
-            🎁 Tài khoản dùng thử còn <strong className="text-[15px]">{Math.max(daysLeft, 0)}</strong> ngày
-          </span>
-          <button className="bg-white text-brand text-xs font-extrabold rounded-full px-3.5 py-1.5">
-            💳 Mua ngay
-          </button>
-        </div>
-      )}
-
       <div className="bg-[#111111] text-white flex items-center justify-between px-6 h-14 sticky top-0 z-[100] shadow-lg no-print">
         <div className="flex items-center gap-2 bg-brand-accent rounded-[10px] px-3 py-1.5">
           <Logo className="w-7 h-7" />

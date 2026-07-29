@@ -22,7 +22,7 @@ export default async function HomePage() {
   const profile = {
     name: dbUser?.name || session.user.name || "",
     title:
-      dbUser?.title || (session.user.role === "admin" ? "Quản trị viên" : "Tài khoản dùng thử"),
+      dbUser?.title || (session.user.role === "admin" ? "Quản trị viên" : "Tư vấn viên tài chính"),
     phone: dbUser?.phone || "",
     email: dbUser?.email || "",
     bio: dbUser?.bio || "",

@@ -447,17 +447,26 @@ export default function NumerologyClient({ agent }) {
                 </div>
               ))}
 
-              <div className="bg-brand-light rounded-lg p-4 flex gap-3 items-center">
-                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-xl">🧑‍💼</div>
-                <div className="text-xs">
-                  <p className="font-bold">{agent?.name}</p>
-                  <p className="text-brand font-medium">Tư vấn viên tài chính</p>
-                  {agent?.phone && (
-                    <p>
-                      📞 {agent.phone} {agent?.email && <>· ✉️ {agent.email}</>}
-                    </p>
+              <div
+                className="flex items-center gap-4 rounded-xl px-[18px] py-3.5"
+                style={{ margin: "24px 0 8px", background: "#FFF5F7", border: "1px solid #F0D0D8" }}
+              >
+                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 border-brand bg-[#FDEAEE] flex items-center justify-center">
+                  {agent?.avatarDataUrl ? (
+                    <img src={agent.avatarDataUrl} alt="avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-2xl">🧑‍💼</span>
                   )}
-                  {agent?.bio && <p className="text-gray-500">{agent.bio}</p>}
+                </div>
+                <div className="text-left">
+                  <div className="text-[13px] font-black text-[#1A0A12] mb-1">{agent?.name}</div>
+                  {(agent?.phone || agent?.email) && (
+                    <div className="flex flex-wrap gap-x-3.5 gap-y-0.5 text-[11px] text-[#6E5A5F]">
+                      {agent?.phone && <span>📞 {agent.phone}</span>}
+                      {agent?.email && <span>✉️ {agent.email}</span>}
+                    </div>
+                  )}
+                  {agent?.bio && <div className="text-[10px] text-[#8E7A7F] italic mt-1">{agent.bio}</div>}
                 </div>
               </div>
 
@@ -468,7 +477,7 @@ export default function NumerologyClient({ agent }) {
 
               <button
                 onClick={() => window.print()}
-                className="no-print mt-6 bg-brand text-white rounded-lg px-5 py-2.5 font-semibold"
+                className="no-print fixed bottom-6 right-6 z-50 bg-[#E57B97] hover:bg-brand text-white rounded-xl px-5 py-3 text-[13px] font-bold shadow-lg flex items-center gap-2"
               >
                 🖨️ In / Lưu PDF
               </button>

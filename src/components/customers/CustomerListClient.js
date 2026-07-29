@@ -86,22 +86,20 @@ export default function CustomerListClient({ agent }) {
               <tr className="text-left text-gray-400 border-b">
                 <th className="py-2">STT</th>
                 <th>Tên KH</th>
-                <th>SĐT</th>
-                <th>Email</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={5} className="text-center py-6 text-gray-400">
+                  <td colSpan={3} className="text-center py-6 text-gray-400">
                     Đang tải...
                   </td>
                 </tr>
               )}
               {!loading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-6 text-gray-400">
+                  <td colSpan={3} className="text-center py-6 text-gray-400">
                     Chưa có khách hàng nào.
                   </td>
                 </tr>
@@ -117,8 +115,6 @@ export default function CustomerListClient({ agent }) {
                       </span>
                     )}
                   </td>
-                  <td>{c.phone || "—"}</td>
-                  <td>{c.email || "—"}</td>
                   <td className="whitespace-nowrap">
                     {c.financialPlan && (
                       <button onClick={() => openDetail(c)} className="text-brand mr-3">
