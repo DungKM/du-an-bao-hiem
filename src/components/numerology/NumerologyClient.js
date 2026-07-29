@@ -5,7 +5,13 @@ import {
   calcNumerology,
   calcNameNumbers,
   calcPinnacles,
+  calcNameChart,
+  calcBirthChart,
+  calcKarmicLessons,
+  calcArrowPresence,
   reduceNumber,
+} from "@/lib/numerology";
+import {
   LIFE_PATH_TEXT,
   DESTINY_TEXT,
   SOUL_URGE_TEXT,
@@ -20,7 +26,7 @@ import {
   SOUL_URGE_SHORT,
   PERSONALITY_SHORT,
   PERSONAL_YEAR_SHORT,
-} from "@/lib/numerology";
+} from "@/lib/numerologyData";
 import ModuleHeader from "@/components/ModuleHeader";
 
 function SparklesIcon({ className }) {
@@ -137,6 +143,8 @@ export default function NumerologyClient({ agent }) {
     const computed = calcNumerology(iso);
     const name = [ho, tenDem, ten].filter(Boolean).join(" ");
     const nameNumbers = calcNameNumbers(name);
+    const nameChart = calcNameChart(name);
+    const birthChart = calcBirthChart(computed.day, computed.month, computed.year);
     setResult({
       ...computed,
       ...nameNumbers,
@@ -144,6 +152,11 @@ export default function NumerologyClient({ agent }) {
       pinnacles: calcPinnacles(computed.lifePath, computed.year),
       age: calcAge(computed.day, computed.month, computed.year),
       reportDate: formatDdMmYyyy(new Date()),
+      nameChart,
+      birthChart,
+      karmicLessons: calcKarmicLessons(nameChart),
+      arrowsName: calcArrowPresence(nameChart),
+      arrowsBirth: calcArrowPresence(birthChart),
     });
     setFullName(name);
   }
