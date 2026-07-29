@@ -58,7 +58,7 @@ export default async function HomePage() {
       </div>
 
       <div className="mt-9 text-center text-[11px] text-[#B0BAB5] leading-[1.9]">
-        <p>Trust Tool · Phiên bản 1.0 · 2026</p>
+        <p>Turbox · Phiên bản 1.0 · 2026</p>
         <p className="mt-1.5 text-[10.5px] text-[#C8B88A] italic">
           ⚠️ Lưu ý: Công cụ này chỉ hỗ trợ quá trình tư vấn trước khi đến với bảng minh họa cuối
           cùng cùng điều khoản sản phẩm.

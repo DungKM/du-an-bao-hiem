@@ -37,7 +37,7 @@ export default function Topbar({ user, daysLeft }) {
       <div className="bg-[#111111] text-white flex items-center justify-between px-6 h-14 sticky top-0 z-[100] shadow-lg no-print">
         <div className="flex items-center gap-2 bg-brand-accent rounded-[10px] px-3 py-1.5">
           <Logo className="w-7 h-7" />
-          <span className="text-sm font-black tracking-wide whitespace-nowrap">Trust Tool</span>
+          <span className="text-sm font-black tracking-wide whitespace-nowrap">Turbox</span>
         </div>
         <div className="flex items-center gap-2.5">
           <span className="text-[13px] text-white">{user?.name}</span>

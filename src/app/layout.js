@@ -22,7 +22,7 @@ const roboto = Roboto({
 });
 
 export const metadata = {
-  title: "Trust Tool",
+  title: "Turbox",
   description: "Bộ công cụ tư vấn tài chính chuyên nghiệp",
 };
 
