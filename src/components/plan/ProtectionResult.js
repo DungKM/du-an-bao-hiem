@@ -15,7 +15,7 @@ export default function ProtectionResult({ need, result }) {
   const years = Number(need.protectYears) || 0;
 
   return (
-    <div className="col-span-2 space-y-3">
+    <div className="col-span-1 sm:col-span-2 space-y-3">
       <div className="bg-[#FDE8E9] rounded-xl px-[18px] py-4">
         <div className="text-sm font-bold text-brand mb-2.5">Kết quả tính toán</div>
         <ResultLine label="Bảo vệ thu nhập theo năm" value={formatVND(result.firstPayment)} />

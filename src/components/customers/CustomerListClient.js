@@ -71,67 +71,88 @@ export default function CustomerListClient({ agent }) {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm p-4">
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3 mb-3 flex-wrap">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="🔍 Tìm theo tên, SĐT, email..."
-              className="border rounded-lg px-3 py-2 text-sm flex-1"
+              className="border rounded-lg px-3 py-2 text-sm flex-1 min-w-[180px]"
             />
-            <span className="text-sm text-gray-400">{filtered.length} khách hàng</span>
+            <span className="text-sm text-gray-400 shrink-0">{filtered.length} khách hàng</span>
           </div>
 
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-400 border-b">
-                <th className="py-2">STT</th>
-                <th>Tên KH</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading && (
-                <tr>
-                  <td colSpan={3} className="text-center py-6 text-gray-400">
-                    Đang tải...
-                  </td>
-                </tr>
-              )}
-              {!loading && filtered.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="text-center py-6 text-gray-400">
-                    Chưa có khách hàng nào.
-                  </td>
-                </tr>
-              )}
-              {filtered.map((c, i) => (
-                <tr key={c._id} className="border-b border-gray-100">
-                  <td className="py-2">{i + 1}</td>
-                  <td className="font-medium">
-                    {c.name}
-                    {c.source === "public" && (
-                      <span className="ml-1.5 text-[10px] font-semibold text-brand bg-brand-light rounded px-1.5 py-0.5 align-middle">
-                        🔗 Tự gửi
-                      </span>
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap">
-                    {c.financialPlan && (
-                      <button onClick={() => openDetail(c)} className="text-brand mr-3">
-                        👁️ Xem
-                      </button>
-                    )}
-                    <button onClick={() => handleDelete(c._id)} className="text-gray-400">✕</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {loading && <p className="text-center py-6 text-gray-400 text-sm">Đang tải...</p>}
+          {!loading && filtered.length === 0 && (
+            <p className="text-center py-6 text-gray-400 text-sm">Chưa có khách hàng nào.</p>
+          )}
+
+          {!loading && filtered.length > 0 && (
+            <>
+              <div className="sm:hidden space-y-2">
+                {filtered.map((c, i) => (
+                  <div key={c._id} className="border border-gray-100 rounded-lg px-3 py-2.5 flex items-center gap-2">
+                    <span className="text-xs text-gray-400 shrink-0">{i + 1}.</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{c.name}</p>
+                      {c.source === "public" && (
+                        <span className="text-[10px] font-semibold text-brand bg-brand-light rounded px-1.5 py-0.5">
+                          🔗 Tự gửi
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      {c.financialPlan && (
+                        <button onClick={() => openDetail(c)} className="text-brand text-sm">
+                          👁️ Xem
+                        </button>
+                      )}
+                      <button onClick={() => handleDelete(c._id)} className="text-gray-400">✕</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full text-sm min-w-[420px]">
+                  <thead>
+                    <tr className="text-left text-gray-400 border-b">
+                      <th className="py-2">STT</th>
+                      <th>Tên KH</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((c, i) => (
+                      <tr key={c._id} className="border-b border-gray-100">
+                        <td className="py-2">{i + 1}</td>
+                        <td className="font-medium">
+                          {c.name}
+                          {c.source === "public" && (
+                            <span className="ml-1.5 text-[10px] font-semibold text-brand bg-brand-light rounded px-1.5 py-0.5 align-middle">
+                              🔗 Tự gửi
+                            </span>
+                          )}
+                        </td>
+                        <td className="whitespace-nowrap">
+                          {c.financialPlan && (
+                            <button onClick={() => openDetail(c)} className="text-brand mr-3">
+                              👁️ Xem
+                            </button>
+                          )}
+                          <button onClick={() => handleDelete(c._id)} className="text-gray-400">✕</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
       {detail && (
-        <div className="fixed inset-0 bg-black/40 flex items-start justify-center z-[200] overflow-auto py-8 print:static print:bg-white print:p-0">
+        <div className="fixed inset-0 bg-black/40 flex items-start justify-center z-[200] overflow-auto py-8 px-3 print:static print:bg-white print:p-0">
           <div className="relative w-full max-w-3xl print:max-w-none">
             <button
               onClick={() => setDetail(null)}

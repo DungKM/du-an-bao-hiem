@@ -111,41 +111,43 @@ export default function AdminClient() {
           </form>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-5 md:col-span-2">
+        <div className="bg-white rounded-xl shadow-sm p-5 md:col-span-2 min-w-0">
           <h3 className="font-bold mb-3">Danh sách tài khoản ({users.length})</h3>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-400 border-b">
-                <th className="py-2">Tên đăng nhập</th>
-                <th>Họ tên</th>
-                <th>SĐT</th>
-                <th>Vai trò</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading && (
-                <tr>
-                  <td colSpan={5} className="text-center py-6 text-gray-400">Đang tải...</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[520px]">
+              <thead>
+                <tr className="text-left text-gray-400 border-b">
+                  <th className="py-2">Tên đăng nhập</th>
+                  <th>Họ tên</th>
+                  <th>SĐT</th>
+                  <th>Vai trò</th>
+                  <th>Thao tác</th>
                 </tr>
-              )}
-              {!loading && users.map((u) => (
-                <tr key={u._id} className="border-b border-gray-100">
-                  <td className="py-2 font-medium">{u.username}</td>
-                  <td>{u.name}</td>
-                  <td>{u.phone || "—"}</td>
-                  <td>
-                    <span className={`text-xs rounded px-2 py-1 ${u.role === "admin" ? "bg-gray-800 text-white" : "bg-brand-light text-brand"}`}>
-                      {u.role === "admin" ? "Quản trị viên" : "Tư vấn viên"}
-                    </span>
-                  </td>
-                  <td>
-                    <button onClick={() => handleDelete(u._id)} className="text-gray-400 hover:text-red-500">✕</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {loading && (
+                  <tr>
+                    <td colSpan={5} className="text-center py-6 text-gray-400">Đang tải...</td>
+                  </tr>
+                )}
+                {!loading && users.map((u) => (
+                  <tr key={u._id} className="border-b border-gray-100">
+                    <td className="py-2 font-medium">{u.username}</td>
+                    <td>{u.name}</td>
+                    <td>{u.phone || "—"}</td>
+                    <td>
+                      <span className={`text-xs rounded px-2 py-1 ${u.role === "admin" ? "bg-gray-800 text-white" : "bg-brand-light text-brand"}`}>
+                        {u.role === "admin" ? "Quản trị viên" : "Tư vấn viên"}
+                      </span>
+                    </td>
+                    <td>
+                      <button onClick={() => handleDelete(u._id)} className="text-gray-400 hover:text-red-500">✕</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

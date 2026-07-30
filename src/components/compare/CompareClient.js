@@ -19,7 +19,7 @@ function ValueCell({ value, colorClass }) {
 
 function InfoRow({ label, value }) {
   return (
-    <div className="flex items-baseline gap-2 py-1">
+    <div className="flex items-baseline gap-2 py-1 flex-wrap">
       <span className="text-[13.5px] text-gray-500">{label}</span>
       <span className="text-[15px] font-bold text-[#1A1A1A]">{value}</span>
     </div>
@@ -60,7 +60,7 @@ export default function CompareClient() {
     <div>
       <ModuleHeader icon="🔀" title="So Sánh Kế Hoạch Đóng Phí" module={4} />
 
-      <div className="bg-white border border-[#F0E4E7] rounded-2xl shadow-sm py-5 px-8 mb-5">
+      <div className="bg-white border border-[#F0E4E7] rounded-2xl shadow-sm py-5 px-4 sm:px-8 mb-5">
         <InfoRow label="Sản phẩm:" value={product} />
         <InfoRow label="Người được bảo hiểm:" value={`${insuredName || "—"} (${age} tuổi, ${gender})`} />
         <InfoRow label="Phí/năm:" value={formatVND(annualPremium)} />
@@ -68,7 +68,7 @@ export default function CompareClient() {
         <InfoRow label="Lãi minh họa (UL):" value={`${illustrativeRate}%`} />
       </div>
 
-      <div className="bg-white border border-[#F0E4E7] rounded-2xl shadow-sm p-6">
+      <div className="bg-white border border-[#F0E4E7] rounded-2xl shadow-sm p-4 sm:p-6">
         <p className="text-[13px] text-gray-500 mb-5 leading-relaxed">
           Tất cả sản phẩm là dòng UL (bảo hiểm liên kết chung), có 2 mức: giá trị hoàn lại theo lãi minh họa {illustrativeRate}%/năm (mức quy
           định) và theo lãi cam kết. Bảng dưới thể hiện giá trị hoàn lại dự kiến tại năm hợp đồng thứ {evalYear} theo các thời hạn đóng phí

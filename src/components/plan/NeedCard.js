@@ -39,7 +39,7 @@ export default function NeedCard({ icon, title, subtitle, selected, onToggle, ch
         </div>
       </div>
       {selected === true && (
-        <div className="mt-4 pt-4 border-t border-[#EFE7E9] grid grid-cols-2 gap-3">{children}</div>
+        <div className="mt-4 pt-4 border-t border-[#EFE7E9] grid grid-cols-1 sm:grid-cols-2 gap-3">{children}</div>
       )}
     </div>
   );

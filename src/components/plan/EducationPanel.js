@@ -37,7 +37,7 @@ function ChildCard({ index, child, onChange }) {
         </span>
       </div>
 
-      <div className="p-4 grid grid-cols-2 gap-3">
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
         <NumField label="Tuổi con hiện tại" value={child.currentAge} onChange={(v) => set({ currentAge: v })} suffix="tuổi" />
         <NumField label="Tuổi bắt đầu đại học" value={child.startAge} onChange={(v) => set({ startAge: v })} suffix="tuổi" />
         <NumField label="Số năm học đại học" value={child.studyYears} onChange={(v) => set({ studyYears: v })} suffix="năm" hint="Tối đa 8 năm" />
@@ -47,7 +47,7 @@ function ChildCard({ index, child, onChange }) {
         <NumField label="Tổng tiết kiệm hiện có cho giáo dục" value={child.currentSavings} onChange={(v) => set({ currentSavings: v })} suffix="đ" />
         <NumField label="Tiết kiệm hàng tháng (dự định)" value={child.monthlySaving} onChange={(v) => set({ monthlySaving: v })} suffix="đ" />
 
-        <div className="col-span-2 bg-[#FDE8E9] rounded-xl px-[18px] py-4">
+        <div className="col-span-1 sm:col-span-2 bg-[#FDE8E9] rounded-xl px-[18px] py-4">
           <div className="text-sm font-bold text-brand mb-2.5">Kết quả tính toán</div>
           <ResultLine label="Thời gian tiết kiệm" value={result.yearsUntilStart + " năm"} />
           <ResultLine label="Tổng mục tiêu giáo dục" value={formatVND(result.targetTotal)} />
@@ -58,7 +58,7 @@ function ChildCard({ index, child, onChange }) {
           <ResultLine label="Cần tiết kiệm thêm mỗi tháng" value={formatVND(result.requiredMonthly) + "/tháng"} strong />
         </div>
 
-        <div className="col-span-2 bg-white border border-[#DED6D8] rounded-xl overflow-hidden">
+        <div className="col-span-1 sm:col-span-2 bg-white border border-[#DED6D8] rounded-xl overflow-hidden">
           <button
             type="button"
             onClick={() => setShowDetail((v) => !v)}
@@ -135,7 +135,7 @@ export default function EducationPanel({ education, onChange }) {
   }
 
   return (
-    <div className="col-span-2 space-y-3.5">
+    <div className="col-span-1 sm:col-span-2 space-y-3.5">
       <label className="block">
         <span className="text-xs font-semibold text-gray-700">Số con cần hoạch định</span>
         <select

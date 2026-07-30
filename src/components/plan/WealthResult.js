@@ -15,7 +15,7 @@ export default function WealthResult({ need, result }) {
   const years = Number(need.years) || 0;
 
   return (
-    <div className="col-span-2 space-y-3">
+    <div className="col-span-1 sm:col-span-2 space-y-3">
       <div className="bg-[#FDE8E9] rounded-xl px-[18px] py-4">
         <div className="text-sm font-bold text-brand mb-2.5">Kết quả tính toán</div>
         <ResultLine label="Khoản tích lũy mong muốn" value={formatVND(result.desiredTarget)} />

@@ -191,7 +191,7 @@ export default function NumerologyClient({ agent }) {
           </header>
 
           <form onSubmit={handleSubmit}>
-            <div className="bg-sand-bg border border-sand rounded-[14px] p-6 mb-5">
+            <div className="bg-sand-bg border border-sand rounded-[14px] p-4 sm:p-6 mb-5">
               <p className="flex items-center text-base font-bold text-gold tracking-[0.5px] mb-[18px]">
                 <UserIcon className="w-[18px] h-[18px] mr-2.5" />
                 Thông tin khách hàng
@@ -272,7 +272,7 @@ export default function NumerologyClient({ agent }) {
               Quay lại
             </button>
 
-            <div className="print-area bg-white rounded-xl shadow-sm p-8">
+            <div className="print-area bg-white rounded-xl shadow-sm p-4 sm:p-8">
               <div className="text-center mb-5">
                 <SparklesIcon className="w-7 h-7 text-gold mx-auto mb-2" />
                 <h2 className="text-2xl font-bold tracking-[0.5px] text-[#2B2722]">

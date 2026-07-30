@@ -18,7 +18,7 @@ function ItemRow({ label, value, onChange, suffix }) {
           type="number"
           value={value}
           onChange={(e) => onChange(e.target.value === "" ? 0 : Number(e.target.value))}
-          className="w-[150px] px-2.5 py-1.5 text-[13px] text-right rounded-lg border border-[#DED6D8] bg-[#FDFBFC] text-[#312629] outline-none focus:border-brand"
+          className="w-[110px] sm:w-[150px] px-2.5 py-1.5 text-[13px] text-right rounded-lg border border-[#DED6D8] bg-[#FDFBFC] text-[#312629] outline-none focus:border-brand"
         />
         {suffix && <span className="text-xs text-[#9AA39E] w-10 shrink-0">{suffix}</span>}
       </div>
@@ -96,7 +96,7 @@ export default function BudgetPanel({ income, onChange }) {
 
   return (
     <div className="mt-4">
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <div className="flex flex-col">
           <label className="text-[12.5px] font-semibold text-[#5C6B65] mb-1.5">
             Thu nhập ròng bình quân/tháng
@@ -135,7 +135,7 @@ export default function BudgetPanel({ income, onChange }) {
         onChangeAt={setSavings}
       />
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <div className="flex flex-col">
           <label className="text-[12.5px] font-semibold text-[#5C6B65] mb-1.5">
             Dự định cho mục tiêu ưu tiên mỗi tháng

@@ -8,11 +8,11 @@ import { ChevronDownIcon, ChevronUpIcon, ShieldIcon } from "./icons";
 const NONE = "__none__";
 const TIER_OPTIONS = HEALTH_CARD_TIERS.inpatient.map((t) => t.tier);
 
-const RIDER_GRID = "grid grid-cols-[1fr_150px_90px] sm:grid-cols-[1fr_180px_100px] gap-2";
+const RIDER_GRID = "grid grid-cols-1 sm:grid-cols-[1fr_180px_100px] gap-2";
 
 function RiderTableHeader() {
   return (
-    <div className={`${RIDER_GRID} items-center border-b-2 border-[#DED6D8] pt-2 pb-3 text-[11px] font-bold uppercase tracking-wide text-gray-500`}>
+    <div className={`${RIDER_GRID} hidden sm:grid items-center border-b-2 border-[#DED6D8] pt-2 pb-3 text-[11px] font-bold uppercase tracking-wide text-gray-500`}>
       <span>Tên quyền lợi</span>
       <span>STBH / Hạng thẻ</span>
       <span className="text-right">Phí đóng (đ)</span>
@@ -28,7 +28,10 @@ function RiderTableRow({ label, hint, fee, children }) {
         {hint && <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">{hint}</p>}
       </div>
       <div className="flex flex-col gap-1.5">{children}</div>
-      <div className="text-right text-sm font-semibold pt-0.5 text-brand">{formatVND(fee)}</div>
+      <div className="flex items-center justify-between sm:block text-right text-sm font-semibold pt-0.5 text-brand">
+        <span className="sm:hidden text-[11px] font-normal text-gray-400">Phí đóng/năm</span>
+        {formatVND(fee)}
+      </div>
     </div>
   );
 }
@@ -71,7 +74,7 @@ function OccupationField({ person, set }) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <label className="block relative">
         <span className="text-xs font-semibold text-gray-700">Nghề nghiệp</span>
         <input
@@ -117,7 +120,7 @@ function MainProductFields({ mainProduct, setMainProduct }) {
   return (
     <div className="border-t border-dashed border-gray-200 pt-3 mt-1 space-y-3">
       <p className="text-[13.5px] font-bold text-brand">Sản phẩm chính</p>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label className="block">
           <span className="text-xs font-semibold text-gray-700">Tên quyền lợi</span>
           <select
@@ -228,7 +231,7 @@ export default function PersonCard({
 
       {!collapsed && (
         <div className="px-[18px] pb-[18px] space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="block">
               <span className="text-xs font-semibold text-gray-700">Họ và tên</span>
               <input

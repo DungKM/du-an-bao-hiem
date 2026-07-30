@@ -2,8 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
-import Sidebar from "@/components/Sidebar";
-import Topbar from "@/components/Topbar";
+import DashboardShell from "@/components/DashboardShell";
 
 export default async function DashboardLayout({ children }) {
   const session = await auth();
@@ -24,14 +23,8 @@ export default async function DashboardLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Topbar user={user} daysLeft={daysLeft} />
-      <div className="flex-1 flex justify-center">
-        <div className="flex w-full max-w-7xl">
-          <Sidebar isAdmin={user.role === "admin"} />
-          <main className="flex-1 p-6 min-w-0">{children}</main>
-        </div>
-      </div>
-    </div>
+    <DashboardShell user={user} daysLeft={daysLeft} isAdmin={user.role === "admin"}>
+      {children}
+    </DashboardShell>
   );
 }

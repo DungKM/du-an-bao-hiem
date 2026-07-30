@@ -140,7 +140,7 @@ export default function PublicPlanClient({ agent, token }) {
                   className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="block">
                   <span className="block text-xs font-semibold text-gray-700 mb-1">Số điện thoại</span>
                   <input

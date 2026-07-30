@@ -68,7 +68,7 @@ export default function PlanReport({ customerName, income, needs, results, agent
   const pctStr = (v) => v.toFixed(1);
 
   return (
-    <div className="print-area bg-white border border-[#DED6D8] rounded-[14px] px-[26px] py-7 max-w-3xl mx-auto text-sm">
+    <div className="print-area bg-white border border-[#DED6D8] rounded-[14px] px-4 sm:px-[26px] py-7 max-w-3xl mx-auto text-sm">
       <div className="flex items-center gap-3.5 mb-[22px] pb-4 border-b-2 border-[#FDE8E9]">
         <div className="w-12 h-12 rounded-full bg-[#FDE8E9] flex items-center justify-center shrink-0">
           <PiggyBankIcon className="w-[26px] h-[26px] text-brand" />
@@ -95,7 +95,7 @@ export default function PlanReport({ customerName, income, needs, results, agent
       <Row label="Dự định cho mục tiêu ưu tiên mỗi năm" value={formatVND((income.monthlyGoal || 0) * 12)} />
 
       <SectionTitle>Nhu cầu ưu tiên hiện nay về tài chính</SectionTitle>
-      <div className="grid grid-cols-2 gap-2.5 mb-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2">
         {Object.entries(NEED_META).map(([key, meta]) => {
           const selected = !!needs[key]?.selected;
           const Icon = meta.Icon;

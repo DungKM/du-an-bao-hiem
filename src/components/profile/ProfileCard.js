@@ -63,7 +63,7 @@ export default function ProfileCard({ initialProfile }) {
   const avatarSrc = (editing ? form.avatarDataUrl : profile.avatarDataUrl) || "";
 
   return (
-    <div className="flex items-stretch gap-6 p-7 pb-6">
+    <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-4 sm:gap-6 p-4 sm:p-7 pb-6 text-center sm:text-left">
       <div className="shrink-0 self-start">
         <input
           ref={fileInputRef}
@@ -98,7 +98,7 @@ export default function ProfileCard({ initialProfile }) {
       </div>
 
       {!editing ? (
-        <div className="flex-1 min-w-0 text-left">
+        <div className="flex-1 min-w-0 text-center sm:text-left">
           <h2 className="text-xl font-bold">{profile.name}</h2>
           <p className="text-brand-accent text-sm font-medium mt-0.5">{profile.title}</p>
           <p className="text-sm text-gray-600 mt-2">
@@ -112,7 +112,7 @@ export default function ProfileCard({ initialProfile }) {
           )}
           <button
             onClick={startEdit}
-            className="mt-3 flex items-center gap-1.5 text-white bg-brand-accent rounded-lg px-3.5 py-1.5 text-sm font-semibold shadow-sm hover:bg-brand transition"
+            className="mt-3 flex items-center gap-1.5 mx-auto sm:mx-0 text-white bg-brand-accent rounded-lg px-3.5 py-1.5 text-sm font-semibold shadow-sm hover:bg-brand transition"
           >
             ✎ Chỉnh sửa
           </button>

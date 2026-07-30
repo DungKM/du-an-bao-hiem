@@ -12,7 +12,7 @@ const BASE_ITEMS = [
   { href: "/phuong-an-da-luu", icon: "💾", label: "Phương Án Đã Lưu", module: 6 },
 ];
 
-export default function Sidebar({ isAdmin }) {
+export default function Sidebar({ isAdmin, open }) {
   const pathname = usePathname();
 
   const items = isAdmin
@@ -20,7 +20,11 @@ export default function Sidebar({ isAdmin }) {
     : BASE_ITEMS;
 
   return (
-    <aside className="w-[250px] shrink-0 bg-sidebar-bg border-r border-sidebar-border p-4 no-print">
+    <aside
+      className={`fixed md:static top-14 md:top-auto bottom-0 md:bottom-auto left-0 z-[95] w-[250px] shrink-0 h-[calc(100vh-56px)] md:h-auto overflow-y-auto bg-sidebar-bg border-r border-sidebar-border p-4 no-print transition-transform duration-200 ${
+        open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      }`}
+    >
       <Link
         href="/"
         className={`relative flex items-center gap-2 w-full rounded-[9px] mb-3 px-[11px] py-[7px] text-[12.5px] transition ${
