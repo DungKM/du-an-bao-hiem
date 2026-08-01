@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { formatVND, calcAgeFromDOB } from "@/lib/finance";
 import { HEALTH_CARD_TIERS, MAIN_PRODUCTS, calcPersonRiders, searchOccupations } from "@/lib/premiumCalc";
+import { MoneyInput } from "@/components/plan/fields";
 import { ChevronDownIcon, ChevronUpIcon, ShieldIcon } from "./icons";
 
 const NONE = "__none__";
@@ -53,10 +54,9 @@ function TierSelect({ value, onChange }) {
 
 function AmountInput({ value, onChange }) {
   return (
-    <input
-      type="number"
+    <MoneyInput
       value={value ?? 0}
-      onChange={(e) => onChange(e.target.value === "" ? 0 : Number(e.target.value))}
+      onChange={(v) => onChange(v === "" ? 0 : v)}
       className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs w-full"
     />
   );
@@ -148,10 +148,9 @@ function MainProductFields({ mainProduct, setMainProduct }) {
         <label className="block">
           <span className="text-xs font-semibold text-gray-700">B1. Số tiền bảo hiểm (STBH)</span>
           <div className="flex items-center border border-gray-200 rounded-lg mt-1 overflow-hidden">
-            <input
-              type="number"
+            <MoneyInput
               value={mainProduct.sumInsured}
-              onChange={(e) => setMainProduct((p) => ({ ...p, sumInsured: e.target.value === "" ? "" : Number(e.target.value) }))}
+              onChange={(v) => setMainProduct((p) => ({ ...p, sumInsured: v }))}
               className="w-full px-3 py-2 text-sm outline-none"
             />
             <span className="px-3 text-xs text-gray-400 bg-gray-50 self-stretch flex items-center">đ</span>
@@ -160,10 +159,9 @@ function MainProductFields({ mainProduct, setMainProduct }) {
         <label className="block">
           <span className="text-xs font-semibold text-gray-700">B2. Mức phí BH (đ/năm)</span>
           <div className="flex items-center border border-gray-200 rounded-lg mt-1 overflow-hidden">
-            <input
-              type="number"
+            <MoneyInput
               value={mainProduct.annualPremium}
-              onChange={(e) => setMainProduct((p) => ({ ...p, annualPremium: e.target.value === "" ? "" : Number(e.target.value) }))}
+              onChange={(v) => setMainProduct((p) => ({ ...p, annualPremium: v }))}
               className="w-full px-3 py-2 text-sm outline-none"
             />
             <span className="px-3 text-xs text-gray-400 bg-gray-50 self-stretch flex items-center">đ/năm</span>

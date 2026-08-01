@@ -6,6 +6,7 @@ const CustomerSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     phone: { type: String, trim: true, default: "" },
     email: { type: String, trim: true, default: "" },
+    dob: { type: String, trim: true, default: "" },
     location: { type: String, trim: true, default: "" },
     source: { type: String, enum: ["agent", "public"], default: "agent" },
     status: {

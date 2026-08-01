@@ -1,6 +1,7 @@
 "use client";
 
 import { formatVND } from "@/lib/finance";
+import { MoneyInput } from "./fields";
 import {
   ESSENTIAL_LABELS,
   NON_ESSENTIAL_LABELS,
@@ -14,10 +15,9 @@ function ItemRow({ label, value, onChange, suffix }) {
     <div className="flex items-center justify-between gap-3">
       <label className="text-[13px] text-[#4D3F43] flex-1">{label}</label>
       <div className="flex items-center gap-1.5 shrink-0">
-        <input
-          type="number"
+        <MoneyInput
           value={value}
-          onChange={(e) => onChange(e.target.value === "" ? 0 : Number(e.target.value))}
+          onChange={(v) => onChange(v === "" ? 0 : v)}
           className="w-[110px] sm:w-[150px] px-2.5 py-1.5 text-[13px] text-right rounded-lg border border-[#DED6D8] bg-[#FDFBFC] text-[#312629] outline-none focus:border-brand"
         />
         {suffix && <span className="text-xs text-[#9AA39E] w-10 shrink-0">{suffix}</span>}
@@ -102,10 +102,9 @@ export default function BudgetPanel({ income, onChange }) {
             Thu nhập ròng bình quân/tháng
           </label>
           <div className="relative flex items-center">
-            <input
-              type="number"
+            <MoneyInput
               value={income.monthlyIncome}
-              onChange={(e) => onChange({ monthlyIncome: e.target.value === "" ? 0 : Number(e.target.value) })}
+              onChange={(v) => onChange({ monthlyIncome: v === "" ? 0 : v })}
               className="w-full px-3 py-2.5 pr-8 text-sm rounded-lg border border-[#DED6D8] bg-[#FDFBFC] text-[#312629] outline-none focus:border-brand"
             />
             <span className="absolute right-3 text-xs text-[#9AA39E] pointer-events-none">đ</span>
@@ -141,10 +140,9 @@ export default function BudgetPanel({ income, onChange }) {
             Dự định cho mục tiêu ưu tiên mỗi tháng
           </label>
           <div className="relative flex items-center">
-            <input
-              type="number"
+            <MoneyInput
               value={income.monthlyGoal}
-              onChange={(e) => onChange({ monthlyGoal: e.target.value === "" ? 0 : Number(e.target.value) })}
+              onChange={(v) => onChange({ monthlyGoal: v === "" ? 0 : v })}
               className="w-full px-3 py-2.5 pr-8 text-sm rounded-lg border border-[#DED6D8] bg-[#FDFBFC] text-[#312629] outline-none focus:border-brand"
             />
             <span className="absolute right-3 text-xs text-[#9AA39E] pointer-events-none">đ</span>

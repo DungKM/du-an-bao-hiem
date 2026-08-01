@@ -28,6 +28,9 @@ export async function POST(req) {
 
   customer.financialPlan = body.financialPlan || null;
   if (body.expectedFee !== undefined) customer.expectedFee = body.expectedFee;
+  if (body.phone !== undefined) customer.phone = body.phone;
+  if (body.email !== undefined) customer.email = body.email;
+  if (body.dob !== undefined) customer.dob = body.dob;
   await customer.save();
 
   return Response.json({ customer });

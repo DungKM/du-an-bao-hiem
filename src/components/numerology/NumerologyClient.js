@@ -97,6 +97,93 @@ function formatDdMmYyyy(date) {
   return `${d}/${m}/${date.getFullYear()}`;
 }
 
+// Danh sách nghề nghiệp cố định cho ô "Nghề nghiệp" (gõ để tìm hoặc bấm chọn).
+const OCCUPATION_LIST = [
+  "Dịch vụ/Thương mại: Quản lý nhà hàng/khách sạn qui mô lớn, quốc tế",
+  "Dịch vụ/Thương mại: Quản lý, điều hành, Quản lý dịch vụ vệ sinh",
+  "Dịch vụ/Thương mại: Chủ dịch vụ cho thuê",
+  "Dịch vụ/Thương mại: Chủ/Quản lý nhà hàng, khách sạn qui mô nhỏ",
+  "Dịch vụ/Thương mại: Buôn bán, kinh doanh tại địa điểm cố định",
+  "Dịch vụ/Thương mại: Buôn bán, kinh doanh tại lô, sạp ở chợ",
+  "Dịch vụ/Thương mại: Kinh doanh kiều hối, kim loại đá quý",
+  "Dịch vụ/Thương mại: Kinh doanh bất động sản",
+  "Dịch vụ/Thương mại: Tư vấn, môi giới, Đại lý bảo hiểm",
+  "Dịch vụ/Thương mại: Nhân viên kinh doanh, bán hàng",
+  "Dịch vụ/Thương mại: Kinh doanh dược phẩm/ Nhân viên kinh doanh",
+  "Dịch vụ/Thương mại: Tín dụng tín chấp, thế chấp",
+  "Dịch vụ/Thương mại: Thợ làm tóc/Làm móng/Trang điểm/Chủ cơ sở",
+  "Dịch vụ/Thương mại: Buôn bán, kinh doanh lưu động",
+  "Dịch vụ/Thương mại: Nhân viên làm việc trạm xăng dầu",
+  "Dịch vụ/Thương mại: Giúp việc nhà",
+  "Dịch vụ/Thương mại: Pha chế",
+  "Dịch vụ/Thương mại: Nhân viên/Thợ lắp đặt, sửa chữa, bảo hành, bảo trì",
+  "Dịch vụ/Thương mại: Công nhân chăm sóc cây xanh/Công nhân vệ sinh",
+  "Dịch vụ/Thương mại: Công nhân vệ sinh đường phố, công cộng",
+  "Dịch vụ/Thương mại: Nhân viên giao hàng/Bưu tá",
+  "Dịch vụ/Thương mại: Đầu bếp, thợ nấu",
+  "Ngành giao thông vận tải: Nhân viên thủ tục/phục vụ hành khách",
+  "Ngành giao thông vận tải: Nhân viên điều độ chạy tàu tuyến/ga",
+  "Ngành giao thông vận tải: Nhân viên điều khiển không lưu",
+  "Ngành giao thông vận tải: Nhân viên mặt đất",
+  "Ngành giao thông vận tải: An ninh hàng không",
+  "Ngành giao thông vận tải: Trưởng tàu",
+  "Ngành giao thông vận tải: Tiếp viên hàng không",
+  "Ngành giao thông vận tải: Phi công máy bay thương mại",
+  "Ngành giao thông vận tải: Nhân viên dịch vụ vệ sinh",
+  "Ngành giao thông vận tải: Lái tàu/Phụ lái",
+  "Ngành giao thông vận tải: Tài xế xe buýt/khách/tải",
+  "Ngành giao thông vận tải: Tài xế xe gắn máy/ba gác",
+  "Ngành giao thông vận tải: Nhân viên giao nhận / vận tải",
+  "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Kiến trúc sư/ Thiết kế/Kỹ sư xây dựng",
+  "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Nhân viên văn phòng/Giám đốc/Quản lý nhà máy",
+  "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Kỹ sư môi trường, Kỹ sư nhà máy",
+  "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Quản lý, giám sát công trình",
+  "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Quản đốc, đốc công",
+  "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Kỹ sư chế tạo/Kỹ sư công nghiệp",
+  "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Sản xuất bao bì, Dệt may, Sản xuất giầy dép",
+  "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Chế biến thủy sản/nông sản, Sản xuất bia/đường",
+  "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Công nhân cơ khí/Thợ máy/Kỹ thuật, bảo trì",
+  "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Công nhân xây dựng, thi công/Thợ hồ",
+  "Hành chính văn phòng: Ban giám đốc",
+  "Hành chính văn phòng: Nhân viên văn phòng",
+  "Hành chính văn phòng: Kỹ sư công nghệ thông tin",
+  "Nông Lâm Ngư Nghiệp: Nghiên cứu, đào tạo, hướng dẫn",
+  "Nông Lâm Ngư Nghiệp: Nuôi trồng thủy hải sản",
+  "Nông Lâm Ngư Nghiệp: Làm ruộng/Trồng trọt/Chăn nuôi",
+  "Nông Lâm Ngư Nghiệp: Làm muối",
+  "Nông Lâm Ngư Nghiệp: Trồng rừng, cao su",
+  "Nông Lâm Ngư Nghiệp: Đánh bắt cá ở sông hồ",
+  "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Tác giả truyện, thơ, văn/Quản lý/Tổng biên tập",
+  "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Người chỉ huy dàn nhạc",
+  "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Diễn viên lồng tiếng",
+  "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Thể thao trí tuệ, bida",
+  "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Hướng dẫn viên du lịch",
+  "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Nhạc sĩ, nhạc công biểu diễn ở nhà hát",
+  "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Thể thao dùng vợt/Golf/Bowling",
+  "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Biểu diễn lưu động",
+  "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Điền kinh/Thể dục/Thể hình",
+  "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Đua xe đạp hoặc thiết bị chuyển động được nhờ đạp",
+  "Tư pháp/Quân đội/Cảnh sát/Bảo vệ: Tư vấn luật/Luật sư/Thẩm phán/Công tố viên",
+  "Tư pháp/Quân đội/Cảnh sát/Bảo vệ: Cấp lãnh đạo, chỉ huy",
+  "Tư pháp/Quân đội/Cảnh sát/Bảo vệ: Sĩ quan không thuộc đặc công/đặc nhiệm",
+  "Tư pháp/Quân đội/Cảnh sát/Bảo vệ: Thi hành án",
+  "Tư pháp/Quân đội/Cảnh sát/Bảo vệ: Điều phối giao thông",
+  "Tư pháp/Quân đội/Cảnh sát/Bảo vệ: Tuần tra, giữ gìn an ninh trật tự",
+  "Công việc khác: Trẻ em",
+  "Công việc khác: Học sinh/sinh viên",
+  "Công việc khác: Tu hành",
+  "Công việc khác: Thầy cúng/Thầy phong thủy",
+  "Công việc khác: Hưu trí",
+  "Công việc khác: Nội trợ",
+  "Công việc khác: Lao động tự do",
+];
+
+function filterOccupations(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return OCCUPATION_LIST;
+  return OCCUPATION_LIST.filter((o) => o.toLowerCase().includes(q));
+}
+
 function BackIcon({ className }) {
   return (
     <svg
@@ -121,6 +208,7 @@ export default function NumerologyClient({ agent }) {
   const [ngaySinh, setNgaySinh] = useState("");
   const [gioiTinh, setGioiTinh] = useState("Nam");
   const [ngheNghiep, setNgheNghiep] = useState("");
+  const [occupationOpen, setOccupationOpen] = useState(false);
 
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -235,14 +323,38 @@ export default function NumerologyClient({ agent }) {
                     <option>Nữ</option>
                   </select>
                 </div>
-                <div className="mb-4 flex-1 min-w-[160px]">
+                <div className="mb-4 flex-1 min-w-[160px] relative">
                   <label className={labelClass}>Nghề nghiệp</label>
                   <input
                     placeholder="Gõ để tìm nghề nghiệp..."
                     value={ngheNghiep}
-                    onChange={(e) => setNgheNghiep(e.target.value)}
+                    onChange={(e) => {
+                      setNgheNghiep(e.target.value);
+                      setOccupationOpen(true);
+                    }}
+                    onFocus={() => setOccupationOpen(true)}
+                    onBlur={() => setTimeout(() => setOccupationOpen(false), 150)}
                     className={inputClass}
                   />
+                  {occupationOpen && filterOccupations(ngheNghiep).length > 0 && (
+                    <ul className="absolute z-20 left-0 right-0 mt-1 bg-white border border-sand rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {filterOccupations(ngheNghiep).map((o) => (
+                        <li key={o}>
+                          <button
+                            type="button"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                              setNgheNghiep(o);
+                              setOccupationOpen(false);
+                            }}
+                            className="w-full text-left px-3 py-1.5 text-sm hover:bg-sand-bg"
+                          >
+                            {o}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             </div>

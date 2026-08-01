@@ -11,6 +11,7 @@ import WealthResult from "./WealthResult";
 import PlanReport from "./PlanReport";
 import { defaultIncome, normalizeIncome } from "./budgetItems";
 import { getDefaultNeeds } from "./defaultNeeds";
+import { calcAgeFromDOB } from "@/lib/finance";
 import {
   WalletIcon,
   ShieldCheckIcon,
@@ -30,9 +31,14 @@ import {
 export default function PlanClient({ agent }) {
   const DEFAULT_NEEDS = getDefaultNeeds();
   const [customerName, setCustomerName] = useState("");
+  const [customerDob, setCustomerDob] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
   const [customerId, setCustomerId] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const customerAge = customerDob ? calcAgeFromDOB(customerDob) : null;
 
   const [income, setIncome] = useState(defaultIncome);
   const [needs, setNeeds] = useState(DEFAULT_NEEDS);
@@ -86,6 +92,9 @@ export default function PlanClient({ agent }) {
   function loadCustomer(c) {
     setCustomerId(c._id);
     setCustomerName(c.name);
+    setCustomerDob(c.dob || "");
+    setCustomerPhone(c.phone || "");
+    setCustomerEmail(c.email || "");
     setShowSuggestions(false);
     if (c.financialPlan) {
       setIncome(normalizeIncome(c.financialPlan.income));
@@ -130,6 +139,9 @@ export default function PlanClient({ agent }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: customerName.trim(),
+        dob: customerDob,
+        phone: customerPhone.trim(),
+        email: customerEmail.trim(),
         expectedFee: Math.round(totalGap / 1_000_000),
         financialPlan: { income, needs, computedAt: new Date().toISOString() },
       }),
@@ -207,6 +219,39 @@ export default function PlanClient({ agent }) {
               </div>
             )}
             {customerId && <p className="text-xs text-green-600 mt-1">Đang chỉnh sửa hồ sơ đã lưu.</p>}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+              <label className="block">
+                <span className="block text-xs font-semibold text-gray-700 mb-1">Ngày sinh</span>
+                <input
+                  type="date"
+                  value={customerDob}
+                  onChange={(e) => setCustomerDob(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+                {customerAge != null && (
+                  <p className="text-xs text-gray-400 mt-1">{customerAge} tuổi</p>
+                )}
+              </label>
+              <label className="block">
+                <span className="block text-xs font-semibold text-gray-700 mb-1">Số điện thoại</span>
+                <input
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="09xxxxxxxx"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="block">
+                <span className="block text-xs font-semibold text-gray-700 mb-1">Email</span>
+                <input
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="ten@gmail.com"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
           </div>
 
           <div className="bg-white border border-[#DED6D8] rounded-[14px] p-[18px]">
