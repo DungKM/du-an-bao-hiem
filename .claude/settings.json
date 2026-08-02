@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -c \"D:\\\\projects\\\\laragon\\\\www\\\\Dự án bảo hiểm\\\\.tmp_xlsx\\\\xl\\\\worksheets\\\\sheet5.xml\" *)",
+      "Read(//d/projects/laragon/www/Dự án bảo hiểm/.tmp_xlsx/xl/**)",
+      "Bash(node dump.js sheet32.xml 15 15 1)",
+      "Bash(node dump.js sheet55.xml 15 20 1)",
+      "Bash(node dump.js sheet50.xml 15 6 1)",
+      "Bash(node dump.js sheet52.xml 15 6 1)",
+      "Bash(node dump.js sheet65.xml 20 8 1)",
+      "Bash(node \"C:\\\\Users\\\\Admin\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--projects-laragon-www-D---n-b-o-hi-m\\\\c640cf94-504e-4f42-a9e2-d30858b8650d\\\\scratchpad\\\\gen_tables.js\")",
+      "Bash(sed 's/from \"\\\\.\\\\/finance\"/from \".\\\\/finance.js\"/' \"d:/projects/laragon/www/Dự án bảo hiểm/src/lib/premiumCalc.js\")",
+      "Bash(node --input-type=module -e ' *)"
+    ]
+  }
+}

@@ -399,6 +399,211 @@ export const MAIN_PRODUCTS = [
   "Trọn Bình An",
 ];
 
+// Bảng tỷ lệ phí cố định (‰ của STBH/năm) theo tuổi & giới tính cho 4 biến thể
+// "Khỏe Trọn Vẹn" — lấy nguyên từ sheet "KTV" trong bảng minh họa chính thức
+// AIA (v9.1_TrustTools2026_AIA). "Tối Ưu" chỉ bán từ 18 tuổi trở lên.
+const KTV_RATES = {
+  0: { tronDoi: { nam: 6.1, nu: 5.7 }, toanDien: { nam: 6.1, nu: 5.7 }, benVung: { nam: 7.8, nu: 6 }, toiUu: { nam: null, nu: null } },
+  1: { tronDoi: { nam: 6.1, nu: 5.7 }, toanDien: { nam: 6.1, nu: 5.7 }, benVung: { nam: 7.8, nu: 6 }, toiUu: { nam: null, nu: null } },
+  2: { tronDoi: { nam: 6.1, nu: 5.7 }, toanDien: { nam: 6.1, nu: 5.7 }, benVung: { nam: 7.8, nu: 6 }, toiUu: { nam: null, nu: null } },
+  3: { tronDoi: { nam: 6.1, nu: 5.7 }, toanDien: { nam: 6.1, nu: 5.7 }, benVung: { nam: 7.8, nu: 6 }, toiUu: { nam: null, nu: null } },
+  4: { tronDoi: { nam: 6.1, nu: 5.7 }, toanDien: { nam: 6.1, nu: 5.7 }, benVung: { nam: 7.8, nu: 6 }, toiUu: { nam: null, nu: null } },
+  5: { tronDoi: { nam: 6.1, nu: 5.7 }, toanDien: { nam: 6.1, nu: 5.7 }, benVung: { nam: 7.9, nu: 6.2 }, toiUu: { nam: null, nu: null } },
+  6: { tronDoi: { nam: 6.1, nu: 5.7 }, toanDien: { nam: 6.1, nu: 5.7 }, benVung: { nam: 8.1, nu: 6.3 }, toiUu: { nam: null, nu: null } },
+  7: { tronDoi: { nam: 6.1, nu: 5.8 }, toanDien: { nam: 6.1, nu: 5.8 }, benVung: { nam: 8.1, nu: 6.3 }, toiUu: { nam: null, nu: null } },
+  8: { tronDoi: { nam: 6.2, nu: 5.8 }, toanDien: { nam: 6.2, nu: 5.8 }, benVung: { nam: 8.5, nu: 6.4 }, toiUu: { nam: null, nu: null } },
+  9: { tronDoi: { nam: 6.2, nu: 5.8 }, toanDien: { nam: 6.2, nu: 5.8 }, benVung: { nam: 8.8, nu: 6.8 }, toiUu: { nam: null, nu: null } },
+  10: { tronDoi: { nam: 6.3, nu: 5.9 }, toanDien: { nam: 6.3, nu: 5.9 }, benVung: { nam: 9.1, nu: 7 }, toiUu: { nam: null, nu: null } },
+  11: { tronDoi: { nam: 6.3, nu: 5.9 }, toanDien: { nam: 6.3, nu: 5.9 }, benVung: { nam: 9.4, nu: 7.3 }, toiUu: { nam: null, nu: null } },
+  12: { tronDoi: { nam: 6.3, nu: 6 }, toanDien: { nam: 6.3, nu: 6 }, benVung: { nam: 9.8, nu: 7.5 }, toiUu: { nam: null, nu: null } },
+  13: { tronDoi: { nam: 6.4, nu: 6 }, toanDien: { nam: 6.4, nu: 6 }, benVung: { nam: 9.8, nu: 7.8 }, toiUu: { nam: null, nu: null } },
+  14: { tronDoi: { nam: 6.4, nu: 6 }, toanDien: { nam: 6.4, nu: 6 }, benVung: { nam: 10.3, nu: 8.1 }, toiUu: { nam: null, nu: null } },
+  15: { tronDoi: { nam: 6.5, nu: 6.1 }, toanDien: { nam: 6.5, nu: 6.1 }, benVung: { nam: 10.7, nu: 8.3 }, toiUu: { nam: null, nu: null } },
+  16: { tronDoi: { nam: 6.5, nu: 6.1 }, toanDien: { nam: 6.5, nu: 6.1 }, benVung: { nam: 11.4, nu: 8.8 }, toiUu: { nam: null, nu: null } },
+  17: { tronDoi: { nam: 6.5, nu: 6.1 }, toanDien: { nam: 6.5, nu: 6.1 }, benVung: { nam: 11.5, nu: 9.2 }, toiUu: { nam: null, nu: null } },
+  18: { tronDoi: { nam: 6.6, nu: 6.2 }, toanDien: { nam: 6.6, nu: 6.2 }, benVung: { nam: 12.3, nu: 9.6 }, toiUu: { nam: 68, nu: 48.2 } },
+  19: { tronDoi: { nam: 6.6, nu: 6.2 }, toanDien: { nam: 6.6, nu: 6.2 }, benVung: { nam: 12.5, nu: 9.8 }, toiUu: { nam: 68, nu: 49 } },
+  20: { tronDoi: { nam: 6.7, nu: 6.3 }, toanDien: { nam: 6.7, nu: 6.3 }, benVung: { nam: 13, nu: 10.5 }, toiUu: { nam: 68, nu: 49.9 } },
+  21: { tronDoi: { nam: 6.8, nu: 6.3 }, toanDien: { nam: 6.8, nu: 6.3 }, benVung: { nam: 13.6, nu: 11 }, toiUu: { nam: 68, nu: 50.8 } },
+  22: { tronDoi: { nam: 6.8, nu: 6.4 }, toanDien: { nam: 6.8, nu: 6.4 }, benVung: { nam: 14.5, nu: 11.6 }, toiUu: { nam: 68, nu: 51.8 } },
+  23: { tronDoi: { nam: 6.9, nu: 6.5 }, toanDien: { nam: 6.9, nu: 6.5 }, benVung: { nam: 15.3, nu: 12.2 }, toiUu: { nam: 68, nu: 52.9 } },
+  24: { tronDoi: { nam: 7, nu: 6.6 }, toanDien: { nam: 7, nu: 6.6 }, benVung: { nam: 16.2, nu: 12.8 }, toiUu: { nam: 68.2, nu: 54.2 } },
+  25: { tronDoi: { nam: 7.1, nu: 6.7 }, toanDien: { nam: 7.1, nu: 6.7 }, benVung: { nam: 17.1, nu: 13.5 }, toiUu: { nam: 68.8, nu: 55.5 } },
+  26: { tronDoi: { nam: 7.2, nu: 6.8 }, toanDien: { nam: 7.2, nu: 6.8 }, benVung: { nam: 18, nu: 14.3 }, toiUu: { nam: 69.9, nu: 57.1 } },
+  27: { tronDoi: { nam: 7.4, nu: 6.9 }, toanDien: { nam: 7.4, nu: 6.9 }, benVung: { nam: 19.1, nu: 14.9 }, toiUu: { nam: 71.6, nu: 58.9 } },
+  28: { tronDoi: { nam: 7.5, nu: 7.1 }, toanDien: { nam: 7.5, nu: 7.1 }, benVung: { nam: 20.6, nu: 15.9 }, toiUu: { nam: 73.7, nu: 61 } },
+  29: { tronDoi: { nam: 7.6, nu: 7.2 }, toanDien: { nam: 7.6, nu: 7.2 }, benVung: { nam: 21.8, nu: 16.9 }, toiUu: { nam: 76.4, nu: 63.4 } },
+  30: { tronDoi: { nam: 7.7, nu: 7.4 }, toanDien: { nam: 7.7, nu: 7.4 }, benVung: { nam: 23.6, nu: 17.6 }, toiUu: { nam: 79.6, nu: 66.2 } },
+  31: { tronDoi: { nam: 7.9, nu: 7.6 }, toanDien: { nam: 8.2, nu: 7.6 }, benVung: { nam: 25.3, nu: 18.3 }, toiUu: { nam: 83.5, nu: 69.5 } },
+  32: { tronDoi: { nam: 8.1, nu: 7.8 }, toanDien: { nam: 9, nu: 7.8 }, benVung: { nam: 27, nu: 19.4 }, toiUu: { nam: 87.9, nu: 73.3 } },
+  33: { tronDoi: { nam: 8.3, nu: 7.9 }, toanDien: { nam: 9.9, nu: 7.9 }, benVung: { nam: 28.9, nu: 20.6 }, toiUu: { nam: 92.9, nu: 77.5 } },
+  34: { tronDoi: { nam: 8.5, nu: 8.1 }, toanDien: { nam: 10.5, nu: 8.1 }, benVung: { nam: 31.7, nu: 22.1 }, toiUu: { nam: 98.6, nu: 82.1 } },
+  35: { tronDoi: { nam: 8.7, nu: 8.3 }, toanDien: { nam: 11.1, nu: 8.3 }, benVung: { nam: 34, nu: 23.4 }, toiUu: { nam: 104.8, nu: 87.2 } },
+  36: { tronDoi: { nam: 9.1, nu: 8.7 }, toanDien: { nam: 11.8, nu: 8.7 }, benVung: { nam: 36.6, nu: 25.2 }, toiUu: { nam: 111.9, nu: 92.7 } },
+  37: { tronDoi: { nam: 9.5, nu: 9.1 }, toanDien: { nam: 12.5, nu: 9.1 }, benVung: { nam: 39.2, nu: 26.7 }, toiUu: { nam: 119.2, nu: 98.5 } },
+  38: { tronDoi: { nam: 10, nu: 9.5 }, toanDien: { nam: 13.5, nu: 9.5 }, benVung: { nam: 42.3, nu: 28.5 }, toiUu: { nam: 126.9, nu: 104.6 } },
+  39: { tronDoi: { nam: 10.5, nu: 10 }, toanDien: { nam: 14.6, nu: 10.1 }, benVung: { nam: 45.3, nu: 30.5 }, toiUu: { nam: 135.2, nu: 110.9 } },
+  40: { tronDoi: { nam: 11.1, nu: 10.5 }, toanDien: { nam: 15.7, nu: 10.8 }, benVung: { nam: 49.4, nu: 33.3 }, toiUu: { nam: 143.9, nu: 117.8 } },
+  41: { tronDoi: { nam: 11.5, nu: 10.9 }, toanDien: { nam: 16.9, nu: 11.5 }, benVung: { nam: 52.6, nu: 34.9 }, toiUu: { nam: 153.3, nu: 124.6 } },
+  42: { tronDoi: { nam: 11.9, nu: 11.2 }, toanDien: { nam: 18.2, nu: 12.2 }, benVung: { nam: 56.1, nu: 37.8 }, toiUu: { nam: 163.3, nu: 131.5 } },
+  43: { tronDoi: { nam: 12.3, nu: 11.6 }, toanDien: { nam: 19.6, nu: 13.1 }, benVung: { nam: 62.1, nu: 40.9 }, toiUu: { nam: 174, nu: 138.8 } },
+  44: { tronDoi: { nam: 12.8, nu: 12 }, toanDien: { nam: 21.3, nu: 14.4 }, benVung: { nam: 66.2, nu: 43.1 }, toiUu: { nam: 185.5, nu: 146.6 } },
+  45: { tronDoi: { nam: 13.3, nu: 12.5 }, toanDien: { nam: 23, nu: 15.5 }, benVung: { nam: 71.4, nu: 47.3 }, toiUu: { nam: 197.8, nu: 154.8 } },
+  46: { tronDoi: { nam: 14.3, nu: 13.3 }, toanDien: { nam: 24.6, nu: 16.8 }, benVung: { nam: 77.2, nu: 50.8 }, toiUu: { nam: 211, nu: 163.5 } },
+  47: { tronDoi: { nam: 15.4, nu: 14.3 }, toanDien: { nam: 26.7, nu: 17.4 }, benVung: { nam: 80.5, nu: 54.5 }, toiUu: { nam: 225, nu: 172.6 } },
+  48: { tronDoi: { nam: 16.7, nu: 15.4 }, toanDien: { nam: 29.4, nu: 19.6 }, benVung: { nam: 88.5, nu: 58.6 }, toiUu: { nam: 239.9, nu: 181.9 } },
+  49: { tronDoi: { nam: 18.2, nu: 16.7 }, toanDien: { nam: 31.1, nu: 21.6 }, benVung: { nam: 93.8, nu: 63.5 }, toiUu: { nam: 255.6, nu: 191.4 } },
+  50: { tronDoi: { nam: 20, nu: 18.2 }, toanDien: { nam: 32.6, nu: 23.1 }, benVung: { nam: 100.6, nu: 68.7 }, toiUu: { nam: 272, nu: 201.2 } },
+  51: { tronDoi: { nam: 21.3, nu: 19.2 }, toanDien: { nam: 36.2, nu: 25.3 }, benVung: { nam: 106.7, nu: 73.4 }, toiUu: { nam: 289.3, nu: 211.3 } },
+  52: { tronDoi: { nam: 22.7, nu: 20.4 }, toanDien: { nam: 36.2, nu: 27.2 }, benVung: { nam: 112.7, nu: 77.9 }, toiUu: { nam: 307.3, nu: 221.9 } },
+  53: { tronDoi: { nam: 24.4, nu: 21.7 }, toanDien: { nam: 40.1, nu: 29.4 }, benVung: { nam: 119.6, nu: 87 }, toiUu: { nam: 326.1, nu: 233.2 } },
+  54: { tronDoi: { nam: 26.3, nu: 23.3 }, toanDien: { nam: 42.5, nu: 31.3 }, benVung: { nam: 126.2, nu: 91 }, toiUu: { nam: 345.7, nu: 245.3 } },
+  55: { tronDoi: { nam: 28.6, nu: 25 }, toanDien: { nam: 45.3, nu: 33.3 }, benVung: { nam: 132.4, nu: 99.3 }, toiUu: { nam: 365.9, nu: 258.5 } },
+  56: { tronDoi: { nam: 30.3, nu: 26.3 }, toanDien: { nam: 49.4, nu: 35.4 }, benVung: { nam: 138.3, nu: 105 }, toiUu: { nam: 386.8, nu: 272.8 } },
+  57: { tronDoi: { nam: 32.3, nu: 27.8 }, toanDien: { nam: 51.2, nu: 38.5 }, benVung: { nam: 144.5, nu: 113.1 }, toiUu: { nam: 408.2, nu: 288.2 } },
+  58: { tronDoi: { nam: 34.5, nu: 29.4 }, toanDien: { nam: 53.2, nu: 41.7 }, benVung: { nam: 152.7, nu: 118.9 }, toiUu: { nam: 430.1, nu: 304.5 } },
+  59: { tronDoi: { nam: 37, nu: 31.3 }, toanDien: { nam: 57.2, nu: 45 }, benVung: { nam: 157.5, nu: 131 }, toiUu: { nam: 452.3, nu: 321.9 } },
+  60: { tronDoi: { nam: 40, nu: 33.3 }, toanDien: { nam: 58.8, nu: 45.9 }, benVung: { nam: 164.1, nu: 134.6 }, toiUu: { nam: 474.9, nu: 340.3 } },
+  61: { tronDoi: { nam: 41.7, nu: 34.5 }, toanDien: { nam: 62.5, nu: 47.1 }, benVung: { nam: 169.6, nu: 141.3 }, toiUu: { nam: 497.8, nu: 359.7 } },
+  62: { tronDoi: { nam: 43.5, nu: 35.7 }, toanDien: { nam: 66, nu: 52.1 }, benVung: { nam: 176.4, nu: 152.2 }, toiUu: { nam: 521, nu: 380.2 } },
+  63: { tronDoi: { nam: 45.5, nu: 37 }, toanDien: { nam: 68, nu: 56 }, benVung: { nam: 183.1, nu: 160.1 }, toiUu: { nam: 544.3, nu: 401.9 } },
+  64: { tronDoi: { nam: 47.6, nu: 38.5 }, toanDien: { nam: 71, nu: 58.5 }, benVung: { nam: 187.4, nu: 165.7 }, toiUu: { nam: 567.8, nu: 424.7 } },
+  65: { tronDoi: { nam: 55.6, nu: 43.5 }, toanDien: { nam: 74, nu: 62.5 }, benVung: { nam: 192.3, nu: 171.8 }, toiUu: { nam: 591.2, nu: 448.6 } },
+  66: { tronDoi: { nam: 62.5, nu: 47.6 }, toanDien: { nam: 76.7, nu: 65.4 }, benVung: { nam: 196.2, nu: 178.9 }, toiUu: { nam: 614.5, nu: 473.6 } },
+  67: { tronDoi: { nam: 71.4, nu: 52.6 }, toanDien: { nam: 80.2, nu: 68.7 }, benVung: { nam: 202.4, nu: 186.7 }, toiUu: { nam: 637.4, nu: 499.4 } },
+  68: { tronDoi: { nam: 83.3, nu: 58.8 }, toanDien: { nam: 83.1, nu: 71.2 }, benVung: { nam: 205.7, nu: 190.9 }, toiUu: { nam: 659.8, nu: 526 } },
+  69: { tronDoi: { nam: 100, nu: 66.7 }, toanDien: { nam: 111.1, nu: 83.3 }, benVung: { nam: 222.3, nu: 196.7 }, toiUu: { nam: 681.6, nu: 553 } },
+  70: { tronDoi: { nam: 100, nu: 66.7 }, toanDien: { nam: 125, nu: 100 }, benVung: { nam: 250, nu: 250 }, toiUu: { nam: 702.7, nu: 580.5 } },
+};
+
+// Hệ số Min/Max theo tuổi dùng để tính dải phí gợi ý cho "Vững Tương Lai" &
+// "Khỏe Bình An" (2 sản phẩm dùng chung 1 bảng "KBA" trong file minh họa gốc).
+// min premium = STBH / maxFactor, max premium = STBH / minFactor.
+const KBA_RANGE_FACTORS = {
+  0: { minFactor: 55, maxFactor: 150 },
+  1: { minFactor: 55, maxFactor: 150 },
+  2: { minFactor: 55, maxFactor: 150 },
+  3: { minFactor: 55, maxFactor: 150 },
+  4: { minFactor: 55, maxFactor: 150 },
+  5: { minFactor: 55, maxFactor: 150 },
+  6: { minFactor: 55, maxFactor: 150 },
+  7: { minFactor: 50, maxFactor: 150 },
+  8: { minFactor: 50, maxFactor: 150 },
+  9: { minFactor: 50, maxFactor: 150 },
+  10: { minFactor: 45, maxFactor: 150 },
+  11: { minFactor: 45, maxFactor: 150 },
+  12: { minFactor: 45, maxFactor: 150 },
+  13: { minFactor: 45, maxFactor: 150 },
+  14: { minFactor: 45, maxFactor: 150 },
+  15: { minFactor: 45, maxFactor: 150 },
+  16: { minFactor: 45, maxFactor: 150 },
+  17: { minFactor: 40, maxFactor: 150 },
+  18: { minFactor: 40, maxFactor: 150 },
+  19: { minFactor: 40, maxFactor: 150 },
+  20: { minFactor: 35, maxFactor: 140 },
+  21: { minFactor: 35, maxFactor: 140 },
+  22: { minFactor: 35, maxFactor: 140 },
+  23: { minFactor: 35, maxFactor: 140 },
+  24: { minFactor: 35, maxFactor: 140 },
+  25: { minFactor: 35, maxFactor: 140 },
+  26: { minFactor: 35, maxFactor: 140 },
+  27: { minFactor: 35, maxFactor: 140 },
+  28: { minFactor: 35, maxFactor: 140 },
+  29: { minFactor: 35, maxFactor: 140 },
+  30: { minFactor: 25, maxFactor: 120 },
+  31: { minFactor: 25, maxFactor: 120 },
+  32: { minFactor: 25, maxFactor: 120 },
+  33: { minFactor: 25, maxFactor: 120 },
+  34: { minFactor: 25, maxFactor: 120 },
+  35: { minFactor: 20, maxFactor: 100 },
+  36: { minFactor: 20, maxFactor: 100 },
+  37: { minFactor: 20, maxFactor: 100 },
+  38: { minFactor: 20, maxFactor: 100 },
+  39: { minFactor: 20, maxFactor: 100 },
+  40: { minFactor: 20, maxFactor: 70 },
+  41: { minFactor: 20, maxFactor: 70 },
+  42: { minFactor: 20, maxFactor: 70 },
+  43: { minFactor: 20, maxFactor: 70 },
+  44: { minFactor: 20, maxFactor: 70 },
+  45: { minFactor: 20, maxFactor: 50 },
+  46: { minFactor: 20, maxFactor: 50 },
+  47: { minFactor: 20, maxFactor: 50 },
+  48: { minFactor: 20, maxFactor: 50 },
+  49: { minFactor: 20, maxFactor: 50 },
+  50: { minFactor: 15, maxFactor: 40 },
+  51: { minFactor: 15, maxFactor: 40 },
+  52: { minFactor: 15, maxFactor: 40 },
+  53: { minFactor: 15, maxFactor: 40 },
+  54: { minFactor: 15, maxFactor: 40 },
+  55: { minFactor: 8, maxFactor: 20 },
+  56: { minFactor: 8, maxFactor: 20 },
+  57: { minFactor: 8, maxFactor: 20 },
+  58: { minFactor: 8, maxFactor: 20 },
+  59: { minFactor: 8, maxFactor: 20 },
+  60: { minFactor: 5, maxFactor: 10 },
+  61: { minFactor: 5, maxFactor: 10 },
+  62: { minFactor: 5, maxFactor: 10 },
+  63: { minFactor: 5, maxFactor: 10 },
+  64: { minFactor: 5, maxFactor: 10 },
+  65: { minFactor: 5, maxFactor: 10 },
+  66: { minFactor: 5, maxFactor: 10 },
+  67: { minFactor: 5, maxFactor: 10 },
+  68: { minFactor: 5, maxFactor: 10 },
+  69: { minFactor: 5, maxFactor: 10 },
+  70: { minFactor: 5, maxFactor: 10 },
+};
+
+const KTV_VARIANT_BY_PRODUCT = {
+  "Khỏe Trọn Vẹn - Trọn Đời": "tronDoi",
+  "Khỏe Trọn Vẹn - Toàn Diện": "toanDien",
+  "Khỏe Trọn Vẹn - Bền Vững": "benVung",
+  "Khỏe Trọn Vẹn - Tối Ưu": "toiUu",
+};
+
+// "Vững Tương Lai" và "Khỏe Bình An" dùng chung bảng hệ số KBA cho dải gợi ý.
+const RANGE_HINT_PRODUCTS = new Set(["Vững Tương Lai", "Khỏe Bình An"]);
+
+export function isFixedPremiumProduct(productName) {
+  return Object.prototype.hasOwnProperty.call(KTV_VARIANT_BY_PRODUCT, productName);
+}
+
+// Phí cố định (Khỏe Trọn Vẹn *): STBH/1000 × tỷ lệ‰ tra theo tuổi/giới tính.
+// Không phụ thuộc thời gian đóng phí (đúng như công thức gốc trong bảng minh
+// họa AIA). Trả về null nếu chưa đủ dữ liệu (chưa chọn sản phẩm KTV, hoặc
+// tuổi ngoài phạm vi bảng — VD "Tối Ưu" chỉ bán từ 18 tuổi).
+export function getKtvFixedPremium(productName, age, gender, sumInsured) {
+  const variant = KTV_VARIANT_BY_PRODUCT[productName];
+  if (!variant) return null;
+  const row = KTV_RATES[Math.round(toNumber(age))];
+  const rate = row?.[variant]?.[gender === "Nữ" ? "nu" : "nam"];
+  if (rate == null) return null;
+  return Math.round((toNumber(sumInsured) / 1000) * rate);
+}
+
+// Dải phí hợp lệ CHƯA làm tròn (Vững Tương Lai / Khỏe Bình An): min =
+// STBH/maxFactor(tuổi), max = STBH/minFactor(tuổi). Dùng để KIỂM TRA phí đã
+// nhập có hợp lệ không — trusttool.co so sánh với số thật, chưa làm tròn.
+// Trả về null nếu sản phẩm không thuộc nhóm này hoặc chưa đủ dữ liệu tuổi.
+export function getSuggestedPremiumRangeRaw(productName, age, sumInsured) {
+  if (!RANGE_HINT_PRODUCTS.has(productName)) return null;
+  const row = KBA_RANGE_FACTORS[Math.round(toNumber(age))];
+  if (!row) return null;
+  const stbh = toNumber(sumInsured);
+  return { min: stbh / row.maxFactor, max: stbh / row.minFactor };
+}
+
+// Dải phí gợi ý để HIỂN THỊ dưới ô nhập — làm tròn "vào trong" đến hàng
+// nghìn: Min làm tròn lên, Max làm tròn xuống, để dải gợi ý hiển thị không
+// bao giờ vượt ra ngoài phạm vi thật.
+export function getSuggestedPremiumRange(productName, age, sumInsured) {
+  const raw = getSuggestedPremiumRangeRaw(productName, age, sumInsured);
+  if (!raw) return null;
+  return {
+    min: Math.ceil(raw.min / 1000) * 1000,
+    max: Math.floor(raw.max / 1000) * 1000,
+  };
+}
+
 // TTTBVV do ung thư tuyến giáp giai đoạn sớm: chi trả 1 lần 10% STBH, tối đa
 // 200 triệu đ/NĐBH.
 export function calcThyroidEarlyStageBenefit(sumInsured) {
@@ -414,33 +619,94 @@ export const HISTORICAL_CREDITING_RATES = [
   { year: 2025, rate: 4.23 },
 ];
 
-// Danh sách nghề nghiệp mẫu để tìm kiếm/tự động suy ra loại nghề (nhóm 1-4).
+// Danh sách nghề nghiệp — dùng chung nội dung với danh sách ở module Thần Số
+// Học (src/components/numerology/NumerologyClient.js), có gắn thêm nhóm rủi
+// ro tai nạn (1-4) để tính phí. LƯU Ý: workbook AIA gốc không có bảng phân
+// nhóm nghề theo tên — nhóm 1-4 dưới đây là suy đoán tạm theo tính chất công
+// việc (văn phòng/ít va chạm = 1 → lao động chân tay/rủi ro cao = 4), CẦN
+// người có bảng phân nhóm chính thức rà soát lại.
 export const OCCUPATION_SEARCH_LIST = [
-  { name: "Nhân viên văn phòng", classValue: 1 },
-  { name: "Kế toán", classValue: 1 },
-  { name: "Giáo viên", classValue: 1 },
-  { name: "Lập trình viên / IT", classValue: 1 },
-  { name: "Bác sĩ (khám phòng khám)", classValue: 1 },
-  { name: "Luật sư", classValue: 1 },
-  { name: "Nhân viên ngân hàng", classValue: 1 },
-  { name: "Nhân viên bán hàng", classValue: 2 },
-  { name: "Kỹ thuật viên", classValue: 2 },
-  { name: "Đầu bếp", classValue: 2 },
-  { name: "Hướng dẫn viên du lịch", classValue: 2 },
-  { name: "Thợ may", classValue: 2 },
-  { name: "Tài xế công nghệ (ô tô)", classValue: 3 },
-  { name: "Thợ điện", classValue: 3 },
-  { name: "Thợ sửa chữa ô tô", classValue: 3 },
-  { name: "Ngư dân (gần bờ)", classValue: 3 },
-  { name: "Công nhân nhà máy", classValue: 3 },
-  { name: "Thợ xây dựng", classValue: 4 },
-  { name: "Thợ hàn/thợ khai thác mỏ", classValue: 4 },
-  { name: "Ngư dân (xa bờ)", classValue: 4 },
-  { name: "Phi công/lính cứu hỏa", classValue: 4 },
+  { name: "Dịch vụ/Thương mại: Quản lý nhà hàng/khách sạn qui mô lớn, quốc tế", classValue: 1 },
+  { name: "Dịch vụ/Thương mại: Quản lý, điều hành, Quản lý dịch vụ vệ sinh", classValue: 2 },
+  { name: "Dịch vụ/Thương mại: Chủ dịch vụ cho thuê", classValue: 1 },
+  { name: "Dịch vụ/Thương mại: Chủ/Quản lý nhà hàng, khách sạn qui mô nhỏ", classValue: 2 },
+  { name: "Dịch vụ/Thương mại: Buôn bán, kinh doanh tại địa điểm cố định", classValue: 2 },
+  { name: "Dịch vụ/Thương mại: Buôn bán, kinh doanh tại lô, sạp ở chợ", classValue: 2 },
+  { name: "Dịch vụ/Thương mại: Kinh doanh kiều hối, kim loại đá quý", classValue: 2 },
+  { name: "Dịch vụ/Thương mại: Kinh doanh bất động sản", classValue: 1 },
+  { name: "Dịch vụ/Thương mại: Tư vấn, môi giới, Đại lý bảo hiểm", classValue: 1 },
+  { name: "Dịch vụ/Thương mại: Nhân viên kinh doanh, bán hàng", classValue: 1 },
+  { name: "Dịch vụ/Thương mại: Kinh doanh dược phẩm/ Nhân viên kinh doanh", classValue: 1 },
+  { name: "Dịch vụ/Thương mại: Tín dụng tín chấp, thế chấp", classValue: 1 },
+  { name: "Dịch vụ/Thương mại: Thợ làm tóc/Làm móng/Trang điểm/Chủ cơ sở", classValue: 2 },
+  { name: "Dịch vụ/Thương mại: Buôn bán, kinh doanh lưu động", classValue: 2 },
+  { name: "Dịch vụ/Thương mại: Nhân viên làm việc trạm xăng dầu", classValue: 3 },
+  { name: "Dịch vụ/Thương mại: Giúp việc nhà", classValue: 2 },
+  { name: "Dịch vụ/Thương mại: Pha chế", classValue: 2 },
+  { name: "Dịch vụ/Thương mại: Nhân viên/Thợ lắp đặt, sửa chữa, bảo hành, bảo trì", classValue: 3 },
+  { name: "Dịch vụ/Thương mại: Công nhân chăm sóc cây xanh/Công nhân vệ sinh", classValue: 3 },
+  { name: "Dịch vụ/Thương mại: Công nhân vệ sinh đường phố, công cộng", classValue: 3 },
+  { name: "Dịch vụ/Thương mại: Nhân viên giao hàng/Bưu tá", classValue: 3 },
+  { name: "Dịch vụ/Thương mại: Đầu bếp, thợ nấu", classValue: 2 },
+  { name: "Ngành giao thông vận tải: Nhân viên thủ tục/phục vụ hành khách", classValue: 1 },
+  { name: "Ngành giao thông vận tải: Nhân viên điều độ chạy tàu tuyến/ga", classValue: 2 },
+  { name: "Ngành giao thông vận tải: Nhân viên điều khiển không lưu", classValue: 2 },
+  { name: "Ngành giao thông vận tải: Nhân viên mặt đất", classValue: 3 },
+  { name: "Ngành giao thông vận tải: An ninh hàng không", classValue: 2 },
+  { name: "Ngành giao thông vận tải: Trưởng tàu", classValue: 2 },
+  { name: "Ngành giao thông vận tải: Tiếp viên hàng không", classValue: 2 },
+  { name: "Ngành giao thông vận tải: Phi công máy bay thương mại", classValue: 3 },
+  { name: "Ngành giao thông vận tải: Nhân viên dịch vụ vệ sinh", classValue: 3 },
+  { name: "Ngành giao thông vận tải: Lái tàu/Phụ lái", classValue: 3 },
+  { name: "Ngành giao thông vận tải: Tài xế xe buýt/khách/tải", classValue: 3 },
+  { name: "Ngành giao thông vận tải: Tài xế xe gắn máy/ba gác", classValue: 4 },
+  { name: "Ngành giao thông vận tải: Nhân viên giao nhận / vận tải", classValue: 3 },
+  { name: "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Kiến trúc sư/ Thiết kế/Kỹ sư xây dựng", classValue: 2 },
+  { name: "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Nhân viên văn phòng/Giám đốc/Quản lý nhà máy", classValue: 1 },
+  { name: "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Kỹ sư môi trường, Kỹ sư nhà máy", classValue: 2 },
+  { name: "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Quản lý, giám sát công trình", classValue: 3 },
+  { name: "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Quản đốc, đốc công", classValue: 3 },
+  { name: "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Kỹ sư chế tạo/Kỹ sư công nghiệp", classValue: 2 },
+  { name: "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Sản xuất bao bì, Dệt may, Sản xuất giầy dép", classValue: 3 },
+  { name: "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Chế biến thủy sản/nông sản, Sản xuất bia/đường", classValue: 3 },
+  { name: "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Công nhân cơ khí/Thợ máy/Kỹ thuật, bảo trì", classValue: 3 },
+  { name: "Khai thác/Sản xuất/Xây dựng/Xử lý chất thải: Công nhân xây dựng, thi công/Thợ hồ", classValue: 4 },
+  { name: "Hành chính văn phòng: Ban giám đốc", classValue: 1 },
+  { name: "Hành chính văn phòng: Nhân viên văn phòng", classValue: 1 },
+  { name: "Hành chính văn phòng: Kỹ sư công nghệ thông tin", classValue: 1 },
+  { name: "Nông Lâm Ngư Nghiệp: Nghiên cứu, đào tạo, hướng dẫn", classValue: 1 },
+  { name: "Nông Lâm Ngư Nghiệp: Nuôi trồng thủy hải sản", classValue: 3 },
+  { name: "Nông Lâm Ngư Nghiệp: Làm ruộng/Trồng trọt/Chăn nuôi", classValue: 3 },
+  { name: "Nông Lâm Ngư Nghiệp: Làm muối", classValue: 3 },
+  { name: "Nông Lâm Ngư Nghiệp: Trồng rừng, cao su", classValue: 3 },
+  { name: "Nông Lâm Ngư Nghiệp: Đánh bắt cá ở sông hồ", classValue: 3 },
+  { name: "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Tác giả truyện, thơ, văn/Quản lý/Tổng biên tập", classValue: 1 },
+  { name: "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Người chỉ huy dàn nhạc", classValue: 1 },
+  { name: "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Diễn viên lồng tiếng", classValue: 1 },
+  { name: "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Thể thao trí tuệ, bida", classValue: 1 },
+  { name: "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Hướng dẫn viên du lịch", classValue: 2 },
+  { name: "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Nhạc sĩ, nhạc công biểu diễn ở nhà hát", classValue: 1 },
+  { name: "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Thể thao dùng vợt/Golf/Bowling", classValue: 2 },
+  { name: "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Biểu diễn lưu động", classValue: 3 },
+  { name: "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Điền kinh/Thể dục/Thể hình", classValue: 3 },
+  { name: "Nghệ thuật/Truyền thông/Thể thao/Du lịch: Đua xe đạp hoặc thiết bị chuyển động được nhờ đạp", classValue: 3 },
+  { name: "Tư pháp/Quân đội/Cảnh sát/Bảo vệ: Tư vấn luật/Luật sư/Thẩm phán/Công tố viên", classValue: 1 },
+  { name: "Tư pháp/Quân đội/Cảnh sát/Bảo vệ: Cấp lãnh đạo, chỉ huy", classValue: 2 },
+  { name: "Tư pháp/Quân đội/Cảnh sát/Bảo vệ: Sĩ quan không thuộc đặc công/đặc nhiệm", classValue: 3 },
+  { name: "Tư pháp/Quân đội/Cảnh sát/Bảo vệ: Thi hành án", classValue: 3 },
+  { name: "Tư pháp/Quân đội/Cảnh sát/Bảo vệ: Điều phối giao thông", classValue: 3 },
+  { name: "Tư pháp/Quân đội/Cảnh sát/Bảo vệ: Tuần tra, giữ gìn an ninh trật tự", classValue: 4 },
+  { name: "Công việc khác: Trẻ em", classValue: 1 },
+  { name: "Công việc khác: Học sinh/sinh viên", classValue: 1 },
+  { name: "Công việc khác: Tu hành", classValue: 1 },
+  { name: "Công việc khác: Thầy cúng/Thầy phong thủy", classValue: 1 },
+  { name: "Công việc khác: Hưu trí", classValue: 1 },
+  { name: "Công việc khác: Nội trợ", classValue: 1 },
+  { name: "Công việc khác: Lao động tự do", classValue: 3 },
 ];
 
 export function searchOccupations(query) {
   const q = (query || "").trim().toLowerCase();
-  if (!q) return [];
-  return OCCUPATION_SEARCH_LIST.filter((o) => o.name.toLowerCase().includes(q)).slice(0, 8);
+  if (!q) return OCCUPATION_SEARCH_LIST;
+  return OCCUPATION_SEARCH_LIST.filter((o) => o.name.toLowerCase().includes(q));
 }

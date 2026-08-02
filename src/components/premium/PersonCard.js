@@ -1,8 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatVND, calcAgeFromDOB } from "@/lib/finance";
-import { HEALTH_CARD_TIERS, MAIN_PRODUCTS, calcPersonRiders, searchOccupations } from "@/lib/premiumCalc";
+import {
+  HEALTH_CARD_TIERS,
+  MAIN_PRODUCTS,
+  calcPersonRiders,
+  searchOccupations,
+  isFixedPremiumProduct,
+  getKtvFixedPremium,
+  getSuggestedPremiumRange,
+  getSuggestedPremiumRangeRaw,
+} from "@/lib/premiumCalc";
 import { MoneyInput } from "@/components/plan/fields";
 import { ChevronDownIcon, ChevronUpIcon, ShieldIcon } from "./icons";
 
@@ -116,7 +125,36 @@ function OccupationField({ person, set }) {
   );
 }
 
-function MainProductFields({ mainProduct, setMainProduct }) {
+function MainProductFields({ mainProduct, setMainProduct, age, gender }) {
+  const fixed = isFixedPremiumProduct(mainProduct.productName);
+  const fixedPremium = fixed ? getKtvFixedPremium(mainProduct.productName, age, gender, mainProduct.sumInsured) : null;
+  const range = getSuggestedPremiumRange(mainProduct.productName, age, mainProduct.sumInsured);
+  const rangeRaw = getSuggestedPremiumRangeRaw(mainProduct.productName, age, mainProduct.sumInsured);
+  const currentPremium = Number(mainProduct.annualPremium) || 0;
+  const outOfRange = !fixed && rangeRaw && (currentPremium < rangeRaw.min || currentPremium > rangeRaw.max);
+
+  useEffect(() => {
+    if (fixed && fixedPremium != null && fixedPremium !== mainProduct.annualPremium) {
+      setMainProduct((p) => ({ ...p, annualPremium: fixedPremium }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fixed, fixedPremium]);
+
+  // Khi STBH/tuổi/sản phẩm làm dải gợi ý (Min-Max thật, chưa làm tròn) dịch
+  // chuyển, tự điền phí = trung điểm của dải, làm tròn đến triệu gần nhất —
+  // đúng cách trusttool.co tự gợi ý phí khi nhập STBH.
+  const prevRangeRef = useRef(rangeRaw);
+  useEffect(() => {
+    const prev = prevRangeRef.current;
+    prevRangeRef.current = rangeRaw;
+    if (fixed || !rangeRaw || !prev) return;
+    if (prev.min === rangeRaw.min && prev.max === rangeRaw.max) return;
+    const midpoint = (rangeRaw.min + rangeRaw.max) / 2;
+    const newPremium = Math.round(midpoint / 1_000_000) * 1_000_000;
+    setMainProduct((p) => ({ ...p, annualPremium: newPremium }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fixed, rangeRaw?.min, rangeRaw?.max]);
+
   return (
     <div className="border-t border-dashed border-gray-200 pt-3 mt-1 space-y-3">
       <p className="text-[13.5px] font-bold text-brand">Sản phẩm chính</p>
@@ -158,17 +196,38 @@ function MainProductFields({ mainProduct, setMainProduct }) {
         </label>
         <label className="block">
           <span className="text-xs font-semibold text-gray-700">B2. Mức phí BH (đ/năm)</span>
-          <div className="flex items-center border border-gray-200 rounded-lg mt-1 overflow-hidden">
-            <MoneyInput
-              value={mainProduct.annualPremium}
-              onChange={(v) => setMainProduct((p) => ({ ...p, annualPremium: v }))}
-              className="w-full px-3 py-2 text-sm outline-none"
-            />
-            <span className="px-3 text-xs text-gray-400 bg-gray-50 self-stretch flex items-center">đ/năm</span>
-          </div>
-          <p className="text-[11px] text-gray-400 mt-1">Dải gợi ý: 10.000.000 – 50.000.000 đ/năm</p>
+          {fixed ? (
+            <div className="flex items-center border border-gray-200 rounded-lg mt-1 overflow-hidden bg-gray-50">
+              <div className="w-full px-3 py-2 text-sm text-gray-700">
+                {fixedPremium != null ? formatVND(fixedPremium) : "—"}
+              </div>
+              <span className="px-3 text-xs text-gray-400 bg-gray-100 self-stretch flex items-center">đ/năm</span>
+            </div>
+          ) : (
+            <div className="flex items-center border border-gray-200 rounded-lg mt-1 overflow-hidden">
+              <MoneyInput
+                value={mainProduct.annualPremium}
+                onChange={(v) => setMainProduct((p) => ({ ...p, annualPremium: v }))}
+                className="w-full px-3 py-2 text-sm outline-none"
+              />
+              <span className="px-3 text-xs text-gray-400 bg-gray-50 self-stretch flex items-center">đ/năm</span>
+            </div>
+          )}
+          {fixed ? (
+            <p className="text-[11px] text-brand mt-1">✓ Phí cố định theo STBH &amp; tuổi</p>
+          ) : range ? (
+            <p className="text-[11px] text-gray-400 mt-1">
+              Dải gợi ý: {formatVND(range.min)} – {formatVND(range.max)} đ/năm
+            </p>
+          ) : null}
         </label>
       </div>
+      {outOfRange && (
+        <p className="text-[12px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          Phí dự kiến phải trong khoảng {(Math.ceil(rangeRaw.min / 1000) * 1000).toLocaleString("vi-VN")} –{" "}
+          {(Math.ceil(rangeRaw.max / 1000) * 1000).toLocaleString("vi-VN")} đ/năm (tương ứng với STBH đã nhập), hãy xem lại!
+        </p>
+      )}
     </div>
   );
 }
@@ -269,7 +328,14 @@ export default function PersonCard({
 
           <OccupationField person={person} set={set} />
 
-          {isMain && <MainProductFields mainProduct={mainProduct} setMainProduct={setMainProduct} />}
+          {isMain && (
+            <MainProductFields
+              mainProduct={mainProduct}
+              setMainProduct={setMainProduct}
+              age={computedAge}
+              gender={person.gender}
+            />
+          )}
 
           <p className="text-sm font-bold text-brand pt-2 border-t border-gray-100">Quyền lợi đính kèm</p>
           <div className="border border-gray-200 rounded-lg px-3">

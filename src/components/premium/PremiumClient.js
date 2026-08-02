@@ -39,7 +39,7 @@ function defaultMainProduct() {
     productName: MAIN_PRODUCTS[0],
     paymentTerm: 20,
     sumInsured: 1_000_000_000,
-    annualPremium: 15_000_000,
+    annualPremium: 10_000_000,
   };
 }
 
