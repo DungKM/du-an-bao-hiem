@@ -13,12 +13,29 @@ export function getEffectiveAge(person, designDate) {
   return toNumber(person.age);
 }
 
+// Tỷ lệ‰ phí Tử vong & thương tật do tai nạn theo nhóm nghề — lấy nguyên từ
+// công thức thật trong "Tinh phi QL" (IF nhóm 1-4, else 0). Verify khớp ví dụ
+// mẫu trong file gốc: nhóm 2, STBH 500.000.000 → phí 2.270.000 (500tr/1000×4.54).
 export const OCCUPATION_CLASSES = [
-  { value: 1, label: "Nhóm 1 — Văn phòng, ít rủi ro", accidentMultiplier: 1 },
-  { value: 2, label: "Nhóm 2 — Rủi ro nhẹ (bán hàng, kỹ thuật viên...)", accidentMultiplier: 1.5 },
-  { value: 3, label: "Nhóm 3 — Rủi ro trung bình (thợ, tài xế...)", accidentMultiplier: 2.2 },
-  { value: 4, label: "Nhóm 4 — Rủi ro cao (xây dựng, khai thác...)", accidentMultiplier: 3.5 },
+  { value: 1, label: "Nhóm 1 — Văn phòng, ít rủi ro", accidentRate: 3.37 },
+  { value: 2, label: "Nhóm 2 — Rủi ro nhẹ (bán hàng, kỹ thuật viên...)", accidentRate: 4.54 },
+  { value: 3, label: "Nhóm 3 — Rủi ro trung bình (thợ, tài xế...)", accidentRate: 8.37 },
+  { value: 4, label: "Nhóm 4 — Rủi ro cao (xây dựng, khai thác...)", accidentRate: 12.16 },
 ];
+
+// Tỷ lệ TCYT (trợ cấp nằm viện) theo tuổi — lấy nguyên từ sheet "TCYT". Chỉ
+// bán tới tuổi 59; ngoài phạm vi bảng trả về null (không tính được).
+const TCYT_RATE_BY_AGE = {
+  1: 181, 2: 181, 3: 181, 4: 181,
+  5: 155, 6: 155, 7: 155, 8: 155, 9: 155, 10: 155,
+  11: 155, 12: 155, 13: 155, 14: 155, 15: 155, 16: 155, 17: 155, 18: 155, 19: 155, 20: 155,
+  21: 155, 22: 155, 23: 155, 24: 155, 25: 155, 26: 155, 27: 155, 28: 155, 29: 155, 30: 155,
+  31: 155, 32: 155, 33: 155, 34: 155,
+  35: 189, 36: 189, 37: 189, 38: 189, 39: 189,
+  40: 230, 41: 230, 42: 230, 43: 230, 44: 230,
+  45: 398, 46: 398, 47: 398, 48: 398, 49: 398, 50: 398,
+  51: 398, 52: 398, 53: 398, 54: 398, 55: 398, 56: 398, 57: 398, 58: 398, 59: 398,
+};
 
 export const HEALTH_CARD_TIERS = {
   inpatient: [
@@ -106,9 +123,13 @@ export function calcHealthCardFee(type, tier, scope) {
   return row.fee;
 }
 
-export function calcHospitalCashFee(amountPerDay) {
-  // Ước lượng: đơn giá/ngày × 300 (xấp xỉ chi phí rủi ro cho quyền lợi trợ cấp).
-  return toNumber(amountPerDay) * 300;
+// Phí TCYT thật: tỷ lệ theo tuổi (‰ của 100đ mức trợ cấp/ngày) × mức trợ
+// cấp/ngày ÷ 100. Verify khớp ví dụ mẫu: tuổi 5-34, trợ cấp 200.000đ/ngày →
+// phí 310.000đ (155 × 200.000/100).
+export function calcHospitalCashFee(age, amountPerDay) {
+  const rate = TCYT_RATE_BY_AGE[Math.round(toNumber(age))];
+  if (rate == null) return 0;
+  return rate * (toNumber(amountPerDay) / 100);
 }
 
 export function calcCriticalIllnessFee(age, gender, sumInsured) {
@@ -122,8 +143,9 @@ export function calcTermLifeFee(age, gender, sumInsured) {
 }
 
 export function calcAccidentFee(occupationClass, sumInsured) {
-  const cls = OCCUPATION_CLASSES.find((o) => o.value === Number(occupationClass)) || OCCUPATION_CLASSES[0];
-  return (toNumber(sumInsured) / 1000) * 0.4 * cls.accidentMultiplier;
+  const cls = OCCUPATION_CLASSES.find((o) => o.value === Number(occupationClass));
+  if (!cls) return 0; // chưa chọn nghề nghiệp (nhóm 1-4) — công thức gốc trả về 0
+  return (toNumber(sumInsured) / 1000) * cls.accidentRate;
 }
 
 export function calcWaiverFee(totalFamilyPremium) {
@@ -150,7 +172,7 @@ export function defaultPerson(role) {
     age: role === "main" ? 30 : 10,
     gender: "Nam",
     occupationName: "",
-    occupationClass: 1,
+    occupationClass: null,
     riders: DEFAULT_RIDERS(),
   };
 }
@@ -194,7 +216,7 @@ export function calcPersonRiders(person, familyPremiumWithoutWaiver, designDate)
       key: "hospitalCash",
       label: "Hỗ trợ chi phí nằm viện",
       sumInsured: toNumber(r.hospitalCash.amountPerDay),
-      fee: calcHospitalCashFee(r.hospitalCash.amountPerDay),
+      fee: calcHospitalCashFee(age, r.hospitalCash.amountPerDay),
       unit: "đ/ngày",
     });
   }

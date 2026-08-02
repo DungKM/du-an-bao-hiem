@@ -257,6 +257,29 @@ export default function PersonCard({
     else setRider(key, { enabled: true, tier, ...extra });
   }
 
+  // "Trọn Bình An" chỉ bán kèm 2 quyền lợi: TCYT & Tử vong/thương tật do tai
+  // nạn — ẩn các quyền lợi đính kèm khác so với những sản phẩm chính còn lại.
+  const limitedRiders = isMain && mainProduct.productName === "Trọn Bình An";
+
+  // Khi vừa chuyển sang "Trọn Bình An", tự điền 2 quyền lợi đính kèm về giá
+  // trị mặc định ban đầu (200.000đ/ngày TCYT, 500.000.000đ STBH tai nạn) —
+  // đúng như trusttool.co tự điền khi chọn sản phẩm này.
+  const prevProductNameRef = useRef(mainProduct?.productName);
+  useEffect(() => {
+    const prevProductName = prevProductNameRef.current;
+    prevProductNameRef.current = mainProduct?.productName;
+    if (!isMain || prevProductName === mainProduct?.productName) return;
+    if (mainProduct.productName !== "Trọn Bình An") return;
+    set({
+      riders: {
+        ...person.riders,
+        hospitalCash: { enabled: true, amountPerDay: 200_000 },
+        accident: { enabled: true, sumInsured: 500_000_000 },
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMain, mainProduct?.productName]);
+
   const { rows, total } = calcPersonRiders(person, familyPremiumWithoutWaiver, designDate);
   const fee = (key) => rows.find((r) => r.key === key)?.fee || 0;
   const computedAge = person.dob ? calcAgeFromDOB(person.dob, designDate) : person.age;
@@ -341,49 +364,55 @@ export default function PersonCard({
           <div className="border border-gray-200 rounded-lg px-3">
             <RiderTableHeader />
 
-            <RiderTableRow
-              label="Thẻ Sức Khỏe Trọn Đời — Nội trú"
-              hint='Hạn mức năm: Cơ bản 150tr · Nâng cao 350tr · Toàn diện 700tr · Hoàn hảo 1.2 tỷ. Chọn "Toàn diện"/"Hoàn hảo" sẽ tự gồm quyền lợi thai sản.'
-              enabled={person.riders.healthCardInpatient.enabled}
-              fee={fee("healthCardInpatient")}
-            >
-              <TierSelect
-                value={person.riders.healthCardInpatient.enabled ? person.riders.healthCardInpatient.tier : null}
-                onChange={(tier) => toggleTier("healthCardInpatient", tier)}
-              />
-              <select
-                value={person.riders.healthCardInpatient.scope}
-                onChange={(e) => setRider("healthCardInpatient", { scope: e.target.value })}
-                className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs w-full"
+            {!limitedRiders && (
+              <RiderTableRow
+                label="Thẻ Sức Khỏe Trọn Đời — Nội trú"
+                hint='Hạn mức năm: Cơ bản 150tr · Nâng cao 350tr · Toàn diện 700tr · Hoàn hảo 1.2 tỷ. Chọn "Toàn diện"/"Hoàn hảo" sẽ tự gồm quyền lợi thai sản.'
+                enabled={person.riders.healthCardInpatient.enabled}
+                fee={fee("healthCardInpatient")}
               >
-                <option value="vn">Phạm vi: Việt Nam</option>
-                <option value="global">Phạm vi: Toàn cầu</option>
-              </select>
-            </RiderTableRow>
+                <TierSelect
+                  value={person.riders.healthCardInpatient.enabled ? person.riders.healthCardInpatient.tier : null}
+                  onChange={(tier) => toggleTier("healthCardInpatient", tier)}
+                />
+                <select
+                  value={person.riders.healthCardInpatient.scope}
+                  onChange={(e) => setRider("healthCardInpatient", { scope: e.target.value })}
+                  className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs w-full"
+                >
+                  <option value="vn">Phạm vi: Việt Nam</option>
+                  <option value="global">Phạm vi: Toàn cầu</option>
+                </select>
+              </RiderTableRow>
+            )}
 
-            <RiderTableRow
-              label="Thẻ Sức Khỏe Trọn Đời — Ngoại trú"
-              hint="Hạn mức năm: Cơ bản 6tr · Nâng cao 12tr · Toàn diện 24tr · Hoàn hảo 48tr"
-              enabled={person.riders.healthCardOutpatient.enabled}
-              fee={fee("healthCardOutpatient")}
-            >
-              <TierSelect
-                value={person.riders.healthCardOutpatient.enabled ? person.riders.healthCardOutpatient.tier : null}
-                onChange={(tier) => toggleTier("healthCardOutpatient", tier)}
-              />
-            </RiderTableRow>
+            {!limitedRiders && (
+              <RiderTableRow
+                label="Thẻ Sức Khỏe Trọn Đời — Ngoại trú"
+                hint="Hạn mức năm: Cơ bản 6tr · Nâng cao 12tr · Toàn diện 24tr · Hoàn hảo 48tr"
+                enabled={person.riders.healthCardOutpatient.enabled}
+                fee={fee("healthCardOutpatient")}
+              >
+                <TierSelect
+                  value={person.riders.healthCardOutpatient.enabled ? person.riders.healthCardOutpatient.tier : null}
+                  onChange={(tier) => toggleTier("healthCardOutpatient", tier)}
+                />
+              </RiderTableRow>
+            )}
 
-            <RiderTableRow
-              label="Thẻ Sức Khỏe Trọn Đời — Nha khoa"
-              hint="Hạn mức năm theo hạng đã chọn"
-              enabled={person.riders.healthCardDental.enabled}
-              fee={fee("healthCardDental")}
-            >
-              <TierSelect
-                value={person.riders.healthCardDental.enabled ? person.riders.healthCardDental.tier : null}
-                onChange={(tier) => toggleTier("healthCardDental", tier)}
-              />
-            </RiderTableRow>
+            {!limitedRiders && (
+              <RiderTableRow
+                label="Thẻ Sức Khỏe Trọn Đời — Nha khoa"
+                hint="Hạn mức năm theo hạng đã chọn"
+                enabled={person.riders.healthCardDental.enabled}
+                fee={fee("healthCardDental")}
+              >
+                <TierSelect
+                  value={person.riders.healthCardDental.enabled ? person.riders.healthCardDental.tier : null}
+                  onChange={(tier) => toggleTier("healthCardDental", tier)}
+                />
+              </RiderTableRow>
+            )}
 
             <RiderTableRow
               label="Bảo hiểm Hỗ trợ chi phí nằm viện (TCYT)"
@@ -397,29 +426,33 @@ export default function PersonCard({
               />
             </RiderTableRow>
 
-            <RiderTableRow
-              label="Bảo hiểm Toàn diện Bệnh hiểm nghèo 2.0"
-              hint="STBH bệnh hiểm nghèo (giai đoạn sớm/giữa/nghiêm trọng gộp 1 quyền lợi)"
-              enabled={person.riders.criticalIllness.enabled}
-              fee={fee("criticalIllness")}
-            >
-              <AmountInput
-                value={person.riders.criticalIllness.sumInsured}
-                onChange={(v) => setRider("criticalIllness", { enabled: v > 0, sumInsured: v })}
-              />
-            </RiderTableRow>
+            {!limitedRiders && (
+              <RiderTableRow
+                label="Bảo hiểm Toàn diện Bệnh hiểm nghèo 2.0"
+                hint="STBH bệnh hiểm nghèo (giai đoạn sớm/giữa/nghiêm trọng gộp 1 quyền lợi)"
+                enabled={person.riders.criticalIllness.enabled}
+                fee={fee("criticalIllness")}
+              >
+                <AmountInput
+                  value={person.riders.criticalIllness.sumInsured}
+                  onChange={(v) => setRider("criticalIllness", { enabled: v > 0, sumInsured: v })}
+                />
+              </RiderTableRow>
+            )}
 
-            <RiderTableRow
-              label="Bảo hiểm tử kỳ gia hạn hàng năm"
-              hint="STBH tử kỳ — phí tái tục tăng theo tuổi mỗi năm"
-              enabled={person.riders.termLife.enabled}
-              fee={fee("termLife")}
-            >
-              <AmountInput
-                value={person.riders.termLife.sumInsured}
-                onChange={(v) => setRider("termLife", { enabled: v > 0, sumInsured: v })}
-              />
-            </RiderTableRow>
+            {!limitedRiders && (
+              <RiderTableRow
+                label="Bảo hiểm tử kỳ gia hạn hàng năm"
+                hint="STBH tử kỳ — phí tái tục tăng theo tuổi mỗi năm"
+                enabled={person.riders.termLife.enabled}
+                fee={fee("termLife")}
+              >
+                <AmountInput
+                  value={person.riders.termLife.sumInsured}
+                  onChange={(v) => setRider("termLife", { enabled: v > 0, sumInsured: v })}
+                />
+              </RiderTableRow>
+            )}
 
             <RiderTableRow
               label="Bảo hiểm Tử vong &amp; thương tật do tai nạn"
