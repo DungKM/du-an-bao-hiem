@@ -11,6 +11,8 @@ import {
   getKtvFixedPremium,
   getSuggestedPremiumRange,
   getSuggestedPremiumRangeRaw,
+  getSuggestedPointPremium,
+  getKtvFixedTerm,
 } from "@/lib/premiumCalc";
 import { MoneyInput } from "@/components/plan/fields";
 import { ChevronDownIcon, ChevronUpIcon, ShieldIcon } from "./icons";
@@ -127,6 +129,7 @@ function OccupationField({ person, set }) {
 
 function MainProductFields({ mainProduct, setMainProduct, age, gender }) {
   const fixed = isFixedPremiumProduct(mainProduct.productName);
+  const fixedTerm = getKtvFixedTerm(mainProduct.productName);
   const fixedPremium = fixed ? getKtvFixedPremium(mainProduct.productName, age, gender, mainProduct.sumInsured) : null;
   const range = getSuggestedPremiumRange(mainProduct.productName, age, mainProduct.sumInsured);
   const rangeRaw = getSuggestedPremiumRangeRaw(mainProduct.productName, age, mainProduct.sumInsured);
@@ -140,6 +143,15 @@ function MainProductFields({ mainProduct, setMainProduct, age, gender }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fixed, fixedPremium]);
 
+  // Mỗi biến thể Khỏe Trọn Vẹn có 1 thời hạn đóng phí cố định — khóa lại,
+  // không cho nhập tự do.
+  useEffect(() => {
+    if (fixedTerm != null && fixedTerm !== mainProduct.paymentTerm) {
+      setMainProduct((p) => ({ ...p, paymentTerm: fixedTerm }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fixedTerm]);
+
   // Khi STBH/tuổi/sản phẩm làm dải gợi ý (Min-Max thật, chưa làm tròn) dịch
   // chuyển, tự điền phí = trung điểm của dải, làm tròn đến triệu gần nhất —
   // đúng cách trusttool.co tự gợi ý phí khi nhập STBH.
@@ -149,8 +161,8 @@ function MainProductFields({ mainProduct, setMainProduct, age, gender }) {
     prevRangeRef.current = rangeRaw;
     if (fixed || !rangeRaw || !prev) return;
     if (prev.min === rangeRaw.min && prev.max === rangeRaw.max) return;
-    const midpoint = (rangeRaw.min + rangeRaw.max) / 2;
-    const newPremium = Math.round(midpoint / 1_000_000) * 1_000_000;
+    const newPremium = getSuggestedPointPremium(mainProduct.productName, age, mainProduct.sumInsured);
+    if (newPremium == null) return;
     setMainProduct((p) => ({ ...p, annualPremium: newPremium }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fixed, rangeRaw?.min, rangeRaw?.max]);
@@ -173,15 +185,22 @@ function MainProductFields({ mainProduct, setMainProduct, age, gender }) {
         </label>
         <label className="block">
           <span className="text-xs font-semibold text-gray-700">Thời gian đóng phí dự kiến (năm)</span>
-          <div className="flex items-center border border-gray-200 rounded-lg mt-1 overflow-hidden">
-            <input
-              type="number"
-              value={mainProduct.paymentTerm}
-              onChange={(e) => setMainProduct((p) => ({ ...p, paymentTerm: e.target.value === "" ? "" : Number(e.target.value) }))}
-              className="w-full px-3 py-2 text-sm outline-none"
-            />
-            <span className="px-3 text-xs text-gray-400 bg-gray-50 self-stretch flex items-center">năm</span>
-          </div>
+          {fixedTerm != null ? (
+            <div className="flex items-center border border-gray-200 rounded-lg mt-1 overflow-hidden bg-gray-50">
+              <div className="w-full px-3 py-2 text-sm text-gray-700">{fixedTerm}</div>
+              <span className="px-3 text-xs text-gray-400 bg-gray-100 self-stretch flex items-center">năm</span>
+            </div>
+          ) : (
+            <div className="flex items-center border border-gray-200 rounded-lg mt-1 overflow-hidden">
+              <input
+                type="number"
+                value={mainProduct.paymentTerm}
+                onChange={(e) => setMainProduct((p) => ({ ...p, paymentTerm: e.target.value === "" ? "" : Number(e.target.value) }))}
+                className="w-full px-3 py-2 text-sm outline-none"
+              />
+              <span className="px-3 text-xs text-gray-400 bg-gray-50 self-stretch flex items-center">năm</span>
+            </div>
+          )}
         </label>
         <label className="block">
           <span className="text-xs font-semibold text-gray-700">B1. Số tiền bảo hiểm (STBH)</span>

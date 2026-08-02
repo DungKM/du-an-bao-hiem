@@ -82,6 +82,13 @@ export default function PremiumClient({ agent }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Ghi snapshot phương án đang nhập vào sessionStorage — để module "So Sánh
+  // Đóng Phí" đọc được dữ liệu mới nhất ngay khi chuyển trang, không cần lưu
+  // vào DB hay bấm nút riêng.
+  useEffect(() => {
+    sessionStorage.setItem("tinhPhiSnapshot", JSON.stringify({ designDate, mainProduct, people }));
+  }, [designDate, mainProduct, people]);
+
   function updatePerson(index, next) {
     setPeople((prev) => prev.map((p, i) => (i === index ? next : p)));
   }

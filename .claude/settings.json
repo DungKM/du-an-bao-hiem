@@ -10,7 +10,9 @@
       "Bash(node dump.js sheet65.xml 20 8 1)",
       "Bash(node \"C:\\\\Users\\\\Admin\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--projects-laragon-www-D---n-b-o-hi-m\\\\c640cf94-504e-4f42-a9e2-d30858b8650d\\\\scratchpad\\\\gen_tables.js\")",
       "Bash(sed 's/from \"\\\\.\\\\/finance\"/from \".\\\\/finance.js\"/' \"d:/projects/laragon/www/Dự án bảo hiểm/src/lib/premiumCalc.js\")",
-      "Bash(node --input-type=module -e ' *)"
+      "Bash(node --input-type=module -e ' *)",
+      "Bash(curl -s -L http://localhost:3000/so-sanh-dong-phi -o /tmp/compare.html -w \"status=%{http_code}\\\\n\")",
+      "Read(//tmp/**)"
     ]
   }
 }

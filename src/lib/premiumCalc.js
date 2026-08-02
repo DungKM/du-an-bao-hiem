@@ -582,6 +582,21 @@ const KTV_VARIANT_BY_PRODUCT = {
   "Khỏe Trọn Vẹn - Tối Ưu": "toiUu",
 };
 
+// Mỗi biến thể Khỏe Trọn Vẹn có ĐÚNG 1 thời hạn đóng phí cố định (không cho
+// chọn tự do như Vững Tương Lai/Khỏe Bình An/Trọn Bình An) — theo trusttool.co.
+const KTV_FIXED_TERM_BY_PRODUCT = {
+  "Khỏe Trọn Vẹn - Trọn Đời": 20,
+  "Khỏe Trọn Vẹn - Toàn Diện": 15,
+  "Khỏe Trọn Vẹn - Bền Vững": 5,
+  "Khỏe Trọn Vẹn - Tối Ưu": 1,
+};
+
+// Trả về thời hạn đóng phí cố định của 1 biến thể Khỏe Trọn Vẹn, hoặc null
+// nếu sản phẩm không thuộc nhóm này (thời hạn được nhập tự do).
+export function getKtvFixedTerm(productName) {
+  return KTV_FIXED_TERM_BY_PRODUCT[productName] ?? null;
+}
+
 // "Vững Tương Lai" và "Khỏe Bình An" dùng chung bảng hệ số KBA cho dải gợi ý.
 const RANGE_HINT_PRODUCTS = new Set(["Vững Tương Lai", "Khỏe Bình An"]);
 
@@ -624,6 +639,39 @@ export function getSuggestedPremiumRange(productName, age, sumInsured) {
     min: Math.ceil(raw.min / 1000) * 1000,
     max: Math.floor(raw.max / 1000) * 1000,
   };
+}
+
+// Phí "điểm đại diện" cho Vững Tương Lai/Khỏe Bình An — trung điểm dải thật,
+// làm tròn đến triệu gần nhất. Đây là công thức trusttool.co dùng để tự điền
+// phí khi vừa nhập STBH (verify: STBH 599.555.555, tuổi 39 → 18.000.000).
+export function getSuggestedPointPremium(productName, age, sumInsured) {
+  const raw = getSuggestedPremiumRangeRaw(productName, age, sumInsured);
+  if (!raw) return null;
+  return Math.round((raw.min + raw.max) / 2 / 1_000_000) * 1_000_000;
+}
+
+// Nghịch đảo getSuggestedPointPremium: cho trước phí muốn giữ cố định, suy
+// ra STBH tương ứng (STBH mà nếu nhập vào sẽ tự điền đúng phí này theo công
+// thức trung điểm). Dùng cho bảng so sánh sản phẩm theo "giữ cố định Phí/năm".
+export function getStbhForSuggestedPremium(productName, age, premium) {
+  if (!RANGE_HINT_PRODUCTS.has(productName)) return null;
+  const row = KBA_RANGE_FACTORS[Math.round(toNumber(age))];
+  if (!row) return null;
+  const halfSumOfInverses = (1 / row.maxFactor + 1 / row.minFactor) / 2;
+  if (halfSumOfInverses <= 0) return null;
+  return toNumber(premium) / halfSumOfInverses;
+}
+
+// Nghịch đảo getKtvFixedPremium: cho trước phí muốn giữ cố định, suy ra STBH
+// tương ứng cho 1 biến thể Khỏe Trọn Vẹn. Dùng cho bảng so sánh sản phẩm
+// theo "giữ cố định Phí/năm".
+export function getKtvStbhForPremium(productName, age, gender, premium) {
+  const variant = KTV_VARIANT_BY_PRODUCT[productName];
+  if (!variant) return null;
+  const row = KTV_RATES[Math.round(toNumber(age))];
+  const rate = row?.[variant]?.[gender === "Nữ" ? "nu" : "nam"];
+  if (!rate) return null;
+  return (toNumber(premium) * 1000) / rate;
 }
 
 // TTTBVV do ung thư tuyến giáp giai đoạn sớm: chi trả 1 lần 10% STBH, tối đa
