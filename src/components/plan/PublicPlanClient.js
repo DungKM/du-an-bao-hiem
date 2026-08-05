@@ -9,8 +9,11 @@ import EducationPanel from "./EducationPanel";
 import RetirementResult from "./RetirementResult";
 import WealthResult from "./WealthResult";
 import PlanReport from "./PlanReport";
+import FinancialSurvey from "./financialSurvey";
+import { getDefaultSurveyAnswers } from "./surveyData";
 import { defaultIncome } from "./budgetItems";
 import { getDefaultNeeds } from "./defaultNeeds";
+import { calcAgeFromDOB } from "@/lib/finance";
 import {
   WalletIcon,
   ShieldCheckIcon,
@@ -31,9 +34,12 @@ export default function PublicPlanClient({ agent, token }) {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerDob, setCustomerDob] = useState("");
+  const [customerGender, setCustomerGender] = useState("");
 
   const [income, setIncome] = useState(defaultIncome);
   const [needs, setNeeds] = useState(getDefaultNeeds);
+  const [surveyAnswers, setSurveyAnswers] = useState(getDefaultSurveyAnswers);
   const [budgetOpen, setBudgetOpen] = useState(false);
 
   const [saving, setSaving] = useState(false);
@@ -79,8 +85,10 @@ export default function PublicPlanClient({ agent, token }) {
         name: customerName.trim(),
         phone: customerPhone.trim(),
         email: customerEmail.trim(),
+        dob: customerDob,
+        gender: customerGender,
         expectedFee: Math.round(totalGap / 1_000_000),
-        financialPlan: { income, needs, computedAt: new Date().toISOString() },
+        financialPlan: { income, needs, surveyAnswers, computedAt: new Date().toISOString() },
       }),
     });
     setSaving(false);
@@ -142,6 +150,19 @@ export default function PublicPlanClient({ agent, token }) {
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="block">
+                  <span className="block text-xs font-semibold text-gray-700 mb-1">Ngày sinh</span>
+                  <input type="date" value={customerDob} onChange={(e) => setCustomerDob(e.target.value)} className="w-full border rounded-lg px-3 py-2 text-sm" />
+                </label>
+                <label className="block">
+                  <span className="block text-xs font-semibold text-gray-700 mb-1">Giới tính</span>
+                  <select value={customerGender} onChange={(e) => setCustomerGender(e.target.value)} className="w-full border rounded-lg px-3 py-2 text-sm bg-white">
+                    <option value="">Chưa chọn</option>
+                    <option value="Nữ">Nữ</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Khác">Khác</option>
+                  </select>
+                </label>
+                <label className="block">
                   <span className="block text-xs font-semibold text-gray-700 mb-1">Số điện thoại</span>
                   <input
                     value={customerPhone}
@@ -161,6 +182,8 @@ export default function PublicPlanClient({ agent, token }) {
                 </label>
               </div>
             </div>
+
+            <FinancialSurvey answers={surveyAnswers} onChange={setSurveyAnswers} />
 
             <div className="bg-white border border-[#DED6D8] rounded-[14px] p-[18px]">
               <div className="flex items-center justify-between flex-wrap gap-3">
@@ -305,8 +328,17 @@ export default function PublicPlanClient({ agent, token }) {
       {showReport && (
         <PlanReport
           customerName={customerName}
+          customer={{
+            name: customerName,
+            dob: customerDob,
+            age: customerDob ? calcAgeFromDOB(customerDob) : null,
+            gender: customerGender,
+            phone: customerPhone,
+            email: customerEmail,
+          }}
           income={income}
           needs={needs}
+          surveyAnswers={surveyAnswers}
           results={results}
           agent={agent}
           reportDate={reportDate}

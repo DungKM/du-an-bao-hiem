@@ -2,6 +2,7 @@
 
 import { formatVND } from "@/lib/finance";
 import { budgetTotals } from "./budgetItems";
+import { FINANCIAL_SURVEY_QUESTIONS, normalizeSurveyAnswers } from "./surveyData";
 import {
   ShieldCheckIcon,
   GraduationCapIcon,
@@ -51,6 +52,21 @@ function NeedTitle({ Icon, title }) {
   );
 }
 
+function InfoItem({ label, value }) {
+  return (
+    <div className="min-w-0 border-b border-[#E2E5E3] px-2 pb-2">
+      <div className="text-[10.5px] text-[#77817C] mb-1">{label}</div>
+      <div className="text-[13px] font-bold text-[#26302B] break-words">{value}</div>
+    </div>
+  );
+}
+
+function formatDob(dob) {
+  if (!dob) return "—";
+  const parts = dob.split("-");
+  return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : dob;
+}
+
 const EDU_ROWS = [
   { label: "Tuổi con hiện tại", value: (c) => c.currentAge + " tuổi" },
   { label: "Tuổi bắt đầu đại học", value: (c) => c.startAge + " tuổi" },
@@ -63,26 +79,64 @@ const EDU_ROWS = [
   { label: "Tổng số tiền cần cho con học đại học", value: (c, r) => formatVND(r?.targetTotal) },
 ];
 
-export default function PlanReport({ customerName, income, needs, results, agent, reportDate, onPrint }) {
+export default function PlanReport({ customerName, customer, income, needs, surveyAnswers, results, agent, reportDate, onPrint }) {
   const totals = budgetTotals(income);
   const pctStr = (v) => v.toFixed(1);
+  const survey = normalizeSurveyAnswers(surveyAnswers);
+  const customerInfo = customer || { name: customerName };
 
   return (
-    <div className="print-area bg-white border border-[#DED6D8] rounded-[14px] px-4 sm:px-[26px] py-7 max-w-3xl mx-auto text-sm">
-      <div className="flex items-center gap-3.5 mb-[22px] pb-4 border-b-2 border-[#FDE8E9]">
-        <div className="w-12 h-12 rounded-full bg-[#FDE8E9] flex items-center justify-center shrink-0">
-          <PiggyBankIcon className="w-[26px] h-[26px] text-brand" />
-        </div>
-        <div>
-          <h2 className="text-lg font-bold m-0">BÁO CÁO TỔNG QUAN HOẠCH ĐỊNH TÀI CHÍNH</h2>
-          <p className="text-gray-400 text-xs mt-1">Ngày lập báo cáo: {reportDate}</p>
-        </div>
+    <div className="print-area bg-white px-2 sm:px-3 py-3 max-w-3xl mx-auto text-sm">
+      <div className="mb-4 overflow-hidden break-inside-avoid bg-white">
+        <img
+          src="/images/banner-bao-cao.png"
+          alt="Báo cáo khảo sát tài chính cá nhân - Quỹ dự phòng"
+          className="block w-full h-[120px] sm:h-[155px] object-cover object-center"
+        />
       </div>
-      {customerName && (
-        <p className="text-brand font-semibold mt-2">Khách hàng: {customerName}</p>
-      )}
+      <section className="mb-4 break-inside-avoid">
+        <div className="text-[#D31145] font-extrabold text-[13px] tracking-wide border-b-2 border-[#D31145] pb-2 mb-3">
+          A. THÔNG TIN KHÁCH HÀNG
+        </div>
+        <div className="grid grid-cols-5 gap-x-2 min-w-0">
+            <InfoItem label="Họ và tên" value={customerInfo.name || customerName || "—"} />
+            <InfoItem label="Ngày sinh" value={formatDob(customerInfo.dob)} />
+            <InfoItem label="Tuổi" value={customerInfo.age != null ? `${customerInfo.age} tuổi` : "—"} />
+            <InfoItem label="Giới tính" value={customerInfo.gender || "—"} />
+            <InfoItem label="Tư vấn viên" value={agent?.name || "—"} />
+        </div>
+      </section>
 
-      <SectionTitle>Phân bổ thu nhập theo quy tắc 50/30/20</SectionTitle>
+      <h2 className="text-[13px] font-extrabold uppercase tracking-wide text-[#D31145] border-b-2 border-[#D31145] pb-2 mb-3">
+        B. Câu hỏi khảo sát
+      </h2>
+      <div className="space-y-3">
+        {FINANCIAL_SURVEY_QUESTIONS.map((question) => (
+          <div key={question.id} className="rounded-lg border border-[#D7E7DE] overflow-hidden break-inside-avoid">
+            <div className="bg-[#D31145] text-white text-[12.5px] font-bold px-3 py-2">
+              Câu hỏi {question.number}: {question.title}
+            </div>
+            <div className="px-3 py-1.5">
+              {question.options.map((option) => {
+                const checked = survey[question.id].includes(option.id);
+                return (
+                  <div key={option.id} className="flex gap-2.5 py-1.5 border-b last:border-b-0 border-[#EEF2EF]">
+                    <span className={`w-4 h-4 mt-0.5 shrink-0 border rounded-sm flex items-center justify-center text-[11px] font-bold ${checked ? "bg-[#FDE8EE] border-[#D31145] text-[#D31145]" : "border-[#AEB7B2] text-transparent"}`}>
+                      ✓
+                    </span>
+                    <div>
+                      <div className="text-[12.5px] font-bold text-[#303633]">{option.label}</div>
+                      <div className="text-[11px] leading-4 text-[#68716C]">{option.description}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <SectionTitle>C. Phân bổ thu nhập theo quy tắc 50/30/20</SectionTitle>
       <Row label="Thu nhập ròng bình quân/tháng" value={formatVND(income.monthlyIncome)} />
       <Row label="A. Tổng chi nhu cầu thiết yếu" value={formatVND(totals.essentialTotal)} />
       <Row label="% Nhu cầu thiết yếu / thu nhập (mục tiêu ≤ 50%)" value={pctStr(totals.essentialPct) + "%"} />

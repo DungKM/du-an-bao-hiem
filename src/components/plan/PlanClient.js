@@ -9,6 +9,8 @@ import EducationPanel from "./EducationPanel";
 import RetirementResult from "./RetirementResult";
 import WealthResult from "./WealthResult";
 import PlanReport from "./PlanReport";
+import FinancialSurvey from "./financialSurvey";
+import { getDefaultSurveyAnswers, normalizeSurveyAnswers } from "./surveyData";
 import { defaultIncome, normalizeIncome } from "./budgetItems";
 import { getDefaultNeeds } from "./defaultNeeds";
 import { calcAgeFromDOB } from "@/lib/finance";
@@ -34,6 +36,7 @@ export default function PlanClient({ agent }) {
   const [customerDob, setCustomerDob] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerGender, setCustomerGender] = useState("");
   const [customerId, setCustomerId] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -42,6 +45,7 @@ export default function PlanClient({ agent }) {
 
   const [income, setIncome] = useState(defaultIncome);
   const [needs, setNeeds] = useState(DEFAULT_NEEDS);
+  const [surveyAnswers, setSurveyAnswers] = useState(getDefaultSurveyAnswers);
   const [budgetOpen, setBudgetOpen] = useState(false);
 
   const [saving, setSaving] = useState(false);
@@ -95,9 +99,11 @@ export default function PlanClient({ agent }) {
     setCustomerDob(c.dob || "");
     setCustomerPhone(c.phone || "");
     setCustomerEmail(c.email || "");
+    setCustomerGender(c.gender || "");
     setShowSuggestions(false);
     if (c.financialPlan) {
       setIncome(normalizeIncome(c.financialPlan.income));
+      setSurveyAnswers(normalizeSurveyAnswers(c.financialPlan.surveyAnswers));
       setNeeds((prev) => {
         const merged = { ...prev };
         for (const key of Object.keys(DEFAULT_NEEDS)) {
@@ -142,8 +148,9 @@ export default function PlanClient({ agent }) {
         dob: customerDob,
         phone: customerPhone.trim(),
         email: customerEmail.trim(),
+        gender: customerGender,
         expectedFee: Math.round(totalGap / 1_000_000),
-        financialPlan: { income, needs, computedAt: new Date().toISOString() },
+        financialPlan: { income, needs, surveyAnswers, computedAt: new Date().toISOString() },
       }),
     });
     setSaving(false);
@@ -220,7 +227,7 @@ export default function PlanClient({ agent }) {
             )}
             {customerId && <p className="text-xs text-green-600 mt-1">Đang chỉnh sửa hồ sơ đã lưu.</p>}
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
               <label className="block">
                 <span className="block text-xs font-semibold text-gray-700 mb-1">Ngày sinh</span>
                 <input
@@ -232,6 +239,19 @@ export default function PlanClient({ agent }) {
                 {customerAge != null && (
                   <p className="text-xs text-gray-400 mt-1">{customerAge} tuổi</p>
                 )}
+              </label>
+              <label className="block">
+                <span className="block text-xs font-semibold text-gray-700 mb-1">Giới tính</span>
+                <select
+                  value={customerGender}
+                  onChange={(e) => setCustomerGender(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm bg-white"
+                >
+                  <option value="">Chưa chọn</option>
+                  <option value="Nữ">Nữ</option>
+                  <option value="Nam">Nam</option>
+                  <option value="Khác">Khác</option>
+                </select>
               </label>
               <label className="block">
                 <span className="block text-xs font-semibold text-gray-700 mb-1">Số điện thoại</span>
@@ -289,6 +309,8 @@ export default function PlanClient({ agent }) {
               </div>
             )}
           </div>
+
+          <FinancialSurvey answers={surveyAnswers} onChange={setSurveyAnswers} />
 
           <div className="bg-white border border-[#DED6D8] rounded-[14px] p-[18px]">
             <div className="flex items-center justify-between flex-wrap gap-3">
@@ -438,8 +460,17 @@ export default function PlanClient({ agent }) {
       {showReport && (
         <PlanReport
           customerName={customerName}
+          customer={{
+            name: customerName,
+            dob: customerDob,
+            age: customerAge,
+            gender: customerGender,
+            phone: customerPhone,
+            email: customerEmail,
+          }}
           income={income}
           needs={needs}
+          surveyAnswers={surveyAnswers}
           results={results}
           agent={agent}
           reportDate={reportDate}

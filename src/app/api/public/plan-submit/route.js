@@ -33,6 +33,8 @@ export async function POST(req) {
     name,
     phone: (body.phone || "").trim(),
     email: (body.email || "").trim(),
+    dob: (body.dob || "").trim(),
+    gender: (body.gender || "").trim(),
     financialPlan: body.financialPlan || null,
     expectedFee: body.expectedFee || 0,
     source: "public",

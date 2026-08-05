@@ -31,6 +31,7 @@ export async function POST(req) {
   if (body.phone !== undefined) customer.phone = body.phone;
   if (body.email !== undefined) customer.email = body.email;
   if (body.dob !== undefined) customer.dob = body.dob;
+  if (body.gender !== undefined) customer.gender = body.gender;
   await customer.save();
 
   return Response.json({ customer });

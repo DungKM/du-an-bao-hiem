@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import PlanReport from "@/components/plan/PlanReport";
 import { normalizeIncome } from "@/components/plan/budgetItems";
+import { calcAgeFromDOB } from "@/lib/finance";
 import {
   calcProtection,
   calcEducation,
@@ -163,8 +164,13 @@ export default function CustomerListClient({ agent }) {
             </button>
             <PlanReport
               customerName={detail.customer.name}
+              customer={{
+                ...detail.customer,
+                age: detail.customer.dob ? calcAgeFromDOB(detail.customer.dob) : null,
+              }}
               income={detail.income}
               needs={detail.needs}
+              surveyAnswers={detail.customer.financialPlan?.surveyAnswers}
               results={detail.results}
               agent={agent}
               reportDate={new Date(detail.customer.updatedAt).toLocaleDateString("vi-VN")}
