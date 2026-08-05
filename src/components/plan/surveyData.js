@@ -23,7 +23,7 @@ export const FINANCIAL_SURVEY_QUESTIONS = [
   },
   {
     id: "financial_risks",
-    number: 5,
+    number: 3,
     title: "Những rủi ro nào có thể ảnh hưởng đến an toàn tài chính?",
     options: [
       ["job", "Công việc", "Nguồn thu nhập chính có thể bị gián đoạn do mất việc, doanh nghiệp phá sản, thị trường biến động hoặc năng lực nghề nghiệp không còn phù hợp."],
@@ -32,7 +32,7 @@ export const FINANCIAL_SURVEY_QUESTIONS = [
   },
   {
     id: "income_loss",
-    number: 6,
+    number: 4,
     title: "Giả sử chẳng may mất đi nguồn thu nhập chính, chi phí sinh hoạt hàng tháng của gia đình sẽ lấy từ đâu?",
     options: [
       ["savings", "Các khoản tiết kiệm", "Sử dụng quỹ tiết kiệm hiện có để trang trải sinh hoạt trong thời gian chưa có nguồn thu nhập thay thế."],
